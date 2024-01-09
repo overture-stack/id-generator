@@ -12,19 +12,13 @@ const port = process.env.PORT
 
 import * as express from 'express';
 import {root} from "./routes/root";
-
-
+import {AppDataSource} from "./data-source";
 
 const app = express();
 
-
 function setExpress(){
-
     app.route("/").get(root);
-
 }
-
-
 
 function startServer(){
     app.listen(port, () => {
@@ -32,5 +26,14 @@ function startServer(){
     });
 }
 
-setExpress();
-startServer();
+AppDataSource.initialize()
+            .then(() => {
+                console.log(`Datasource initialized`);
+                setExpress();
+                startServer();
+            })
+            .catch(err => {
+                console.log(`Error during datasource initialization: ${err}`);
+                process.exit(1)
+            })
+
