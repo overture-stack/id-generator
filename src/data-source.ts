@@ -1,4 +1,5 @@
 import {DataSource} from "typeorm";
+import {Donor} from "./models/donor";
 
 
 export const AppDataSource = new DataSource({
@@ -8,7 +9,11 @@ export const AppDataSource = new DataSource({
     password: process.env.DB_PASSWORD,
     port: parseInt(process.env.DB_PORT),
     database: process.env.DB_NAME,
-    entities:[],
+    schema: process.env.DB_SCHEMA,
+    entities:[
+        Donor
+    ],
+    synchronize: true,
     logging: true
 });
 

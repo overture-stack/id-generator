@@ -12,12 +12,21 @@ const port = process.env.PORT
 
 import * as express from 'express';
 import {root} from "./routes/root";
+import {getId} from "./services/donor-id-service"
 import {AppDataSource} from "./data-source";
 
+
+const cors = require("cors");
+const bodyParser = require("body-parser");
 const app = express();
 
-function setExpress(){
+function setupExpress(){
+    app.use(cors({origin: true}));
+    app.use(bodyParser.json());
+
     app.route("/").get(root);
+    app.route("/donors/:programId/:submitterId").get(getId);
+
 }
 
 function startServer(){
@@ -29,7 +38,7 @@ function startServer(){
 AppDataSource.initialize()
             .then(() => {
                 console.log(`Datasource initialized`);
-                setExpress();
+                setupExpress();
                 startServer();
             })
             .catch(err => {
