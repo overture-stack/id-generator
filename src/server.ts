@@ -9,11 +9,10 @@ if(config.error){
 
 const port = process.env.PORT
 
-
 import * as express from 'express';
-import {root} from "./routes/root";
-import {getId} from "./services/donor-id-service"
+import {getIdForEntity, root} from "./routes/root";
 import {AppDataSource} from "./data-source";
+import {defaultErrorHandler} from "./middlewares/error-handler";
 
 
 const cors = require("cors");
@@ -25,7 +24,8 @@ function setupExpress(){
     app.use(bodyParser.json());
 
     app.route("/").get(root);
-    app.route("/donors/:programId/:submitterId").get(getId);
+    app.route("/:entityType/:programId/:submitterId").get(getIdForEntity);
+    app.use(defaultErrorHandler);
 
 }
 
