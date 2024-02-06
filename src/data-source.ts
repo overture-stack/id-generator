@@ -1,5 +1,7 @@
 import {DataSource} from "typeorm";
 import {Donor} from "./models/donor";
+import {Specimen} from "./models/specimen";
+import {Sample} from "./models/sample";
 
 
 export const AppDataSource = new DataSource({
@@ -11,7 +13,9 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     schema: process.env.DB_SCHEMA,
     entities:[
-        Donor
+        Donor,
+        Specimen,
+        Sample
     ],
     synchronize: true,
     logging: true

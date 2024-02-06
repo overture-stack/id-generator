@@ -11,3 +11,11 @@ export function defaultErrorHandler(err, req: Request, res: Response, next: Next
         message: "Error while getting id for entity type: "+req.params.entityType+ " -- "+ err
     })
 }
+
+
+export class IdGenerationError extends Error {
+    constructor(message) {
+        super(message);
+    }
+
+}

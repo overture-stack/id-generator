@@ -3,10 +3,10 @@ import {AppDataSource} from "../data-source";
 
 
 @Entity({
-    name: "donor"
+    name: "sample"
 })
-@Unique('submitter_donor_uniq',["submitterId", "programId"], ) // check this combination
-export class Donor {
+@Unique('submitter_sample_uniq',["submitterId", "programId"], ) // check this combination
+export class Sample {
 
     @PrimaryGeneratedColumn()
     id: string;
@@ -17,8 +17,8 @@ export class Donor {
     @Column({name: "program_id"})
     programId: string;
 
-    @Column({name: "argo_id",
-        default: () => `nextval('idGen.donor_seq')`})
+    @Column({name: "specimen_id",
+        default: () => `nextval('idGen.sample_seq')`})
     argoId: number;
 
     @Column({name: "entity_type"})
@@ -30,21 +30,26 @@ export class Donor {
     @UpdateDateColumn({name: "updated_at"})
     updateAt: Date;
 
+    /*constructor(submitterId: string, programId: string) {
+        this.submitterId = submitterId;
+        this.programId = programId;
+        this.entityType = "Specimen"
+    }*/
+
     constructor(){}
 
-    submitter(submitter: string): Donor {
+    submitter(submitter: string): Sample {
         this.submitterId = submitter;
         return this;
     }
 
-    program(program: string): Donor {
+    program(program: string): Sample {
         this.programId = program;
         return this;
     }
 
-    entity(type: string): Donor {
+    entity(type: string): Sample {
         this.entityType = type;
         return this;
     }
-
 }
