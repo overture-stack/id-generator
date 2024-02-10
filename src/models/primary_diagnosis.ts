@@ -1,11 +1,12 @@
 import {Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique, UpdateDateColumn} from "typeorm";
+import {AppDataSource} from "../data-source";
 
 
 @Entity({
-    name: "donor"
+    name: "primary_diagnosis"
 })
-@Unique('submitter_donor_uniq',["submitterId", "programId"], ) // check this combination
-export class Donor {
+@Unique('submitter_primary_diag_uniq',["submitterId", "programId"], ) // check this combination
+export class PrimaryDiagnosis {
 
     @PrimaryGeneratedColumn()
     id: string;
@@ -16,8 +17,8 @@ export class Donor {
     @Column({name: "program_id"})
     programId: string;
 
-    @Column({name: "argo_id",
-        default: () => `nextval('idGen.donor_seq')`})
+    @Column({name: "primary_diagnosis_id",
+        default: () => `nextval('idGen.primary_diagnosis_seq')`})
     argoId: number;
 
     @Column({name: "entity_type"})
@@ -29,21 +30,26 @@ export class Donor {
     @UpdateDateColumn({name: "updated_at"})
     updateAt: Date;
 
+    /*constructor(submitterId: string, programId: string) {
+        this.submitterId = submitterId;
+        this.programId = programId;
+        this.entityType = "Specimen"
+    }*/
+
     constructor(){}
 
-    submitter(submitter: string): Donor {
+    submitter(submitter: string): PrimaryDiagnosis {
         this.submitterId = submitter;
         return this;
     }
 
-    program(program: string): Donor {
+    program(program: string): PrimaryDiagnosis {
         this.programId = program;
         return this;
     }
 
-    entity(type: string): Donor {
+    entity(type: string): PrimaryDiagnosis {
         this.entityType = type;
         return this;
     }
-
 }

@@ -13,6 +13,10 @@ import * as express from 'express';
 import {getIdForEntity, root} from "./routes/root";
 import {AppDataSource} from "./data-source";
 import {defaultErrorHandler} from "./middlewares/error-handler";
+import {Column, ColumnType, Entity, PrimaryColumn} from "typeorm";
+import {createTableAndRepo} from "./models/dynamic-table";
+import {Repository} from "typeorm/repository/Repository";
+import {ObjectLiteral} from "typeorm/common/ObjectLiteral";
 
 
 const cors = require("cors");
@@ -35,7 +39,40 @@ function startServer(){
     });
 }
 
-AppDataSource.initialize()
+
+
+// --------------------------------------------
+async function createSchema(){
+
+    const columns: {name: string, type: ColumnType}[] = [{
+        "name": "column1",
+        "type": "string"
+    },
+        {
+            "name": "column2",
+            "type": "string"
+        }]
+
+    const repo = await createTableAndRepo("TestTable", columns);
+    return repo;
+
+}
+
+async function createData(repo: Promise<Repository<ObjectLiteral>>) {
+    const data= {column1: "val1", column2: "val2"};
+
+    (await repo).save(data).catch()
+}
+
+
+
+createData(createSchema()).catch();
+
+
+// --------------------------------------------
+
+
+/*AppDataSource.initialize()
             .then(() => {
                 console.log(`Datasource initialized`);
                 setupExpress();
@@ -44,5 +81,5 @@ AppDataSource.initialize()
             .catch(err => {
                 console.log(`Error during datasource initialization: ${err}`);
                 process.exit(1)
-            })
+            })*/
 

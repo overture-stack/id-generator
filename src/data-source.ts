@@ -2,8 +2,13 @@ import {DataSource} from "typeorm";
 import {Donor} from "./models/donor";
 import {Specimen} from "./models/specimen";
 import {Sample} from "./models/sample";
+import {Treatment} from "./models/treatment";
+import {PrimaryDiagnosis} from "./models/primary_diagnosis";
+import {Chemotherapy} from "./models/chemotherapy";
+import {HormoneTherapy} from "./models/hormone_therapy";
 
 
+/*
 export const AppDataSource = new DataSource({
     type: "postgres",
     host: process.env.DB_HOST,
@@ -15,10 +20,14 @@ export const AppDataSource = new DataSource({
     entities:[
         Donor,
         Specimen,
-        Sample
+        Sample,
+        Treatment,
+        PrimaryDiagnosis,
+        Chemotherapy,
+        HormoneTherapy
     ],
     synchronize: true,
     logging: true
 });
 
-console.log(AppDataSource.options);
+console.log(AppDataSource.options);*/
