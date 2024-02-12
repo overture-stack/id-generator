@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 import {getId} from "../services/id-service";
-import {closeDBConnection} from "../middlewares/repo-connection";
+import {closeDBConnection} from "../middlewares/datasource";
 
 
 

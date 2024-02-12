@@ -4,7 +4,7 @@ import {
     closeDBConnection,
     getConnectionAndRepo,
     SchemaInfo
-} from "../middlewares/repo-connection";
+} from "../middlewares/datasource";
 import {Mutex} from "async-mutex";
 
 const mutex = new Mutex();
@@ -56,9 +56,12 @@ export async function getId(request: Request, response: Response, next: NextFunc
         if (!id) {
             id = await createId(keyCriteria, entityType, next, requestId);
         }
+        return id;
     }finally {
         release();
     }
+
+
 
 }
 

@@ -31,9 +31,6 @@ export async function getConnectionAndRepo(schema: SchemaInfo, requestId: number
         @CreateDateColumn({name: "created_at"})
         createdAt: Date;
 
-        @UpdateDateColumn({name: "updated_at"})
-        updateAt: Date;
-
         constructor() {
             schema.columns.forEach(({name, type, defaultValue}) => {
                 this[name] = undefined
