@@ -13,7 +13,7 @@ import * as express from 'express';
 import {getIdForEntity, root} from "./routes/root";
 import {defaultErrorHandler} from "./middlewares/error-handler";
 import {getSchemaInfo} from "./services/id-service";
-import {getConnectionAndRepo} from "./middlewares/datasource";
+import {prepareDataSource} from "./middlewares/datasource";
 
 
 const cors = require("cors");
@@ -41,9 +41,9 @@ function initializeDB(){
     const entities: [] = JSON.parse(process.env["ENTITY_LIST"]);
     entities.forEach((entity) => {
         const  schemaInfo = getSchemaInfo(entity);
-        const repo = getConnectionAndRepo(schemaInfo, 1)
-                .then(() => console.log("DB initialized"))
-                .catch(() => "Error upon DB initialization");
+        const repo = prepareDataSource(schemaInfo, 1)
+                .then(() => console.log("Entity "+ entity +" initialized"))
+                .catch(() => "Error upon "+ entity +" initialization");
     })
 }
 

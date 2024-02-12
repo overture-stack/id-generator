@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from "express"
 import {IdGenerationError} from "../middlewares/error-handler";
 import {
     closeDBConnection,
-    getConnectionAndRepo,
+    prepareDataSource,
     SchemaInfo
 } from "../middlewares/datasource";
 import {Mutex} from "async-mutex";
@@ -12,7 +12,7 @@ const mutex = new Mutex();
 // create new id
 async function createId(searchCriteria: {}, entityType: string, next: NextFunction, requestId: number){
     console.log("******** CREATE CALLED :"+ requestId)
-    const repo = await getConnectionAndRepo(getSchemaInfo(entityType), requestId);
+    const repo = await prepareDataSource(getSchemaInfo(entityType), requestId);
     const savedEntity = await repo.save(searchCriteria);
     await closeDBConnection(next, requestId).then(() => console.log("DB connection closed"))
     return savedEntity;//.argoId;
@@ -22,7 +22,7 @@ async function createId(searchCriteria: {}, entityType: string, next: NextFuncti
 async function findId(searchCriteria: {}, entityType: string, next: NextFunction, requestId: number){
     console.log("******** FIND CALLED :"+ requestId)
     const  schemaInfo = getSchemaInfo(entityType);
-    const repo = await getConnectionAndRepo(schemaInfo, requestId);
+    const repo = await prepareDataSource(schemaInfo, requestId);
     let query = repo
         .createQueryBuilder(schemaInfo.tablename)
         .where(schemaInfo.tablename+"."+Object.keys(searchCriteria)[0]+ "= :"+Object.keys(searchCriteria)[0], {[Object.keys(searchCriteria)[0]]: searchCriteria[Object.keys(searchCriteria)[0]]})
@@ -75,7 +75,6 @@ export function getSchemaInfo(entity: string){
     let schemaInfo = {} as SchemaInfo;
     schemaInfo = JSON.parse(process.env[entity+`_schema`]);
     return schemaInfo;
-
 }
 
 

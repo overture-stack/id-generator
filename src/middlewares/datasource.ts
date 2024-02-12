@@ -18,7 +18,7 @@ export interface SchemaInfo {
 
 export let connection = {} as Connection;
 
-export async function getConnectionAndRepo(schema: SchemaInfo, requestId: number) {
+export async function prepareDataSource(schema: SchemaInfo, requestId: number) {
 
     @Entity({
         name: schema.tablename
@@ -43,8 +43,23 @@ export async function getConnectionAndRepo(schema: SchemaInfo, requestId: number
         Column({type, default: () => defaultValue})(DynamicTable.prototype, name);
     });
 
+    if((!getConnectionManager().has(requestId.toString())) || (getConnectionManager().has(requestId.toString()) && (!connection.isConnected))){
+        connection = await createConnection({
+            type: 'postgres',
+            name: requestId.toString(),
+            host: process.env.DB_HOST,
+            username: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            port: parseInt(process.env.DB_PORT),
+            database: process.env.DB_NAME,
+            schema: process.env.DB_SCHEMA,
+            entities: [DynamicTable],
+            synchronize: true,
+            logging: true
+        });
+    }
 
-    if(!getConnectionManager().has(requestId.toString())){
+   /* if(!getConnectionManager().has(requestId.toString())){
             connection = await createConnection({
                 type: 'postgres',
                 name: requestId.toString(),
@@ -71,21 +86,22 @@ export async function getConnectionAndRepo(schema: SchemaInfo, requestId: number
                 database: process.env.DB_NAME,
                 schema: process.env.DB_SCHEMA,
                 entities: [DynamicTable],
-                synchronize: true/*,
-                logging: true*/
+                synchronize: true,
+                logging: true
             });
         }
-    }
+    }*/
 
     const repository = connection.getRepository(DynamicTable);
     return repository;
 }
 
 
-export async function destroyConnection(){
-    await connection.destroy();
+export async function createSequences(sql: string){
+    if(sql) {
+        await connection.query(sql);
+    }
 }
-
 
 export async function closeDBConnection(next: NextFunction, requestId: number) {
     if(getConnectionManager().has(requestId.toString())) {
