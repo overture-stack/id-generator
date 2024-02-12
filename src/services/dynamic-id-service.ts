@@ -1,5 +1,5 @@
 import {ColumnType} from "typeorm";
-import {createTableAndRepo} from "../models/dynamic-table";
+//import {createTableAndRepo} from "../models/dynamic-table";
 
 /*function createSchema(){
 

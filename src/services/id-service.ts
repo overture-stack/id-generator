@@ -1,39 +1,80 @@
-
 import {NextFunction, Request, Response} from "express"
-import {getEntity, getRepo} from "./repository-service";
 import {IdGenerationError} from "../middlewares/error-handler";
-import {entityTypes} from "../models/entity-types";
+import {
+    closeDBConnection,
+    getConnectionAndRepo,
+    SchemaInfo
+} from "../middlewares/repo-connection";
+import {Mutex} from "async-mutex";
+
+const mutex = new Mutex();
 
 // create new id
- async function createId(programId: string, submitterId: string, entityType: string){
-    const entity = getRepo(entityType).create(getEntity(entityType).submitter(submitterId).program(programId).entity(entityType));
-    const savedEntity = await getRepo(entityType).save(entity);
-    return savedEntity.argoId;
+async function createId(searchCriteria: {}, entityType: string, next: NextFunction, requestId: number){
+    console.log("******** CREATE CALLED :"+ requestId)
+    const repo = await getConnectionAndRepo(getSchemaInfo(entityType), requestId);
+    const savedEntity = await repo.save(searchCriteria);
+    await closeDBConnection(next, requestId).then(() => console.log("DB connection closed"))
+    return savedEntity;//.argoId;
 }
 
 // check if an argo id exists for the submitter and program
- async function findId(programId: string, submitterId: string, entityType: string){
-     const entity = await getRepo(entityType).createQueryBuilder(entityType)
-         .where(entityType+".submitter_id = :subId", {subId: submitterId})
-         .andWhere( entityType+".program_id = :prId", {prId: programId})
-         .getOne();
-     return entity?.argoId;
+async function findId(searchCriteria: {}, entityType: string, next: NextFunction, requestId: number){
+    console.log("******** FIND CALLED :"+ requestId)
+    const  schemaInfo = getSchemaInfo(entityType);
+    const repo = await getConnectionAndRepo(schemaInfo, requestId);
+    let query = repo
+        .createQueryBuilder(schemaInfo.tablename)
+        .where(schemaInfo.tablename+"."+Object.keys(searchCriteria)[0]+ "= :"+Object.keys(searchCriteria)[0], {[Object.keys(searchCriteria)[0]]: searchCriteria[Object.keys(searchCriteria)[0]]})
+
+    if (Object.keys(searchCriteria).length>1){
+        for(let i = 1; i<=Object.keys(searchCriteria).length-1; i++){
+            query = query.andWhere(schemaInfo.tablename+"."+Object.keys(searchCriteria)[i]+ "= :"+Object.keys(searchCriteria)[i], {[Object.keys(searchCriteria)[i]]: searchCriteria[Object.keys(searchCriteria)[i]]})
+        }
+    }
+    const entity = await query.addSelect([schemaInfo.tablename+".argoId"]).getOne();
+    await closeDBConnection(next, requestId).then(() => console.log("DB connection closed"))
+    return entity;
+
 }
 
 
-export async function getId(request: Request, response: Response, next: NextFunction){
-    const programId = request.params.programId;
-    const submitterId  = request.params.submitterId;
-    const entityType = request.params.entityType;
+export async function getId(request: Request, response: Response, next: NextFunction, requestId: number){
 
-    if(!Object.values(entityTypes).includes(entityType)){
-        next(new IdGenerationError("invalid entity type"));
+    const release = await mutex.acquire();
+
+    try {
+        const entityType = request.params.entityType;
+        let keyCriteria = getSearchCriteria(entityType);
+        keyCriteria = {...request.params};
+
+        if (!Object.values(JSON.parse(process.env["ENTITY_LIST"])).includes(entityType)) {
+            next(new IdGenerationError("invalid entity type"));
+        }
+
+        let id = await findId(keyCriteria, entityType, next, requestId);
+        if (!id) {
+            id = await createId(keyCriteria, entityType, next, requestId);
+        }
+    }finally {
+        release();
     }
 
-    let id = await findId(programId, submitterId, entityType);
-    if(!id){
-        id = await createId(programId, submitterId, entityType);
-    }
-    return id;
 }
 
+
+function getSearchCriteria(entity: string){
+    const keyCriteria = process.env[entity] as {};
+    return keyCriteria
+}
+
+export function getSchemaInfo(entity: string){
+    let schemaInfo = {} as SchemaInfo;
+    schemaInfo = JSON.parse(process.env[entity+`_schema`]);
+    return schemaInfo;
+
+}
+
+
+/// To check
+// return just the id and not the whole entity
