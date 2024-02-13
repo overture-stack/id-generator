@@ -25,7 +25,6 @@ function setupExpress(){
     app.use(bodyParser.json());
 
     app.route("/").get(root);
-    //app.route("/:programId/:submitterId/:entityType").get(getIdForEntity);
     app.route(process.env["REQUEST_ROUTE"]).get(getIdForEntity);
     app.use(defaultErrorHandler);
 
@@ -59,7 +58,6 @@ async function initializeDBSequences(){
 
 async function main() {
     try {
-        // Execute functions sequentially and await their completion
         await initializeDBSequences();
         await initializeDB();
         await setupExpress();

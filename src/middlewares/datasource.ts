@@ -5,7 +5,7 @@ import {
     createConnection,
     CreateDateColumn,
     Entity, getConnectionManager,
-    PrimaryGeneratedColumn, UpdateDateColumn
+    PrimaryGeneratedColumn
 } from "typeorm";
 import {NextFunction} from "express";
 
@@ -40,7 +40,6 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number) {
     }
 
     schema.columns.forEach(({name, type, defaultValue}) => {
-        //Column({type, default: () => `nextval('idGen.donor_seq')`})(DynamicTable.prototype, name);
         Column({type, default: () => defaultValue})(DynamicEntity.prototype, name);
     });
 
