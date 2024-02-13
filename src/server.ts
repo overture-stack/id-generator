@@ -13,7 +13,7 @@ import * as express from 'express';
 import {getIdForEntity, root} from "./routes/root";
 import {defaultErrorHandler} from "./middlewares/error-handler";
 import {getSchemaInfo} from "./services/id-service";
-import {prepareDataSource} from "./middlewares/datasource";
+import {createSequences, prepareDataSource} from "./middlewares/datasource";
 
 
 const cors = require("cors");
@@ -37,7 +37,7 @@ function startServer(){
     });
 }
 
-function initializeDB(){
+async function initializeDB(){
     const entities: [] = JSON.parse(process.env["ENTITY_LIST"]);
     entities.forEach((entity) => {
         const  schemaInfo = getSchemaInfo(entity);
@@ -47,8 +47,32 @@ function initializeDB(){
     })
 }
 
-setupExpress();
-startServer();
-initializeDB();
+async function initializeDBSequences(){
+    const entities: [] = JSON.parse(process.env["ENTITY_LIST"]);
+    entities.forEach((entity) => {
+        const  schemaInfo = getSchemaInfo(entity);
+        const seq = createSequences(schemaInfo.sequence)
+            .then(() => console.log("Sequence "+ entity +" created"))
+            .catch((err) => console.log("Error "+err+" upon "+ entity +" sequence creation"));
+    })
+}
+
+async function main() {
+    try {
+        // Execute functions sequentially and await their completion
+        await initializeDBSequences();
+        await initializeDB();
+        await setupExpress();
+        await startServer();
+
+        console.log('Server started successfully');
+    } catch (error) {
+        console.error('Error starting server:', error);
+    }
+}
+
+
+main();
+
 
 

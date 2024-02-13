@@ -40,9 +40,7 @@ async function findId(searchCriteria: {}, entityType: string, next: NextFunction
 
 
 export async function getId(request: Request, response: Response, next: NextFunction, requestId: number){
-
     const release = await mutex.acquire();
-
     try {
         const entityType = request.params.entityType;
         let keyCriteria = getSearchCriteria(entityType);
@@ -60,9 +58,6 @@ export async function getId(request: Request, response: Response, next: NextFunc
     }finally {
         release();
     }
-
-
-
 }
 
 
