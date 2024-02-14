@@ -12,8 +12,7 @@ const port = process.env.PORT
 import * as express from 'express';
 import {getIdForEntity, root} from "./routes/root";
 import {defaultErrorHandler} from "./middlewares/error-handler";
-import {getSchemaInfo} from "./services/id-service";
-import {createSequences, prepareDataSource} from "./middlewares/datasource";
+import {createSequences, getSequenceDefinition, getTableDefinition} from "./middlewares/datasource";
 
 
 const cors = require("cors");
@@ -27,7 +26,6 @@ function setupExpress(){
     app.route("/").get(root);
     app.route(process.env["REQUEST_ROUTE"]).get(getIdForEntity);
     app.use(defaultErrorHandler);
-
 }
 
 function startServer(){
@@ -36,33 +34,20 @@ function startServer(){
     });
 }
 
-async function initializeDB(){
-    const entities: [] = JSON.parse(process.env["ENTITY_LIST"]);
-    entities.forEach((entity) => {
-        const  schemaInfo = getSchemaInfo(entity);
-        const repo = prepareDataSource(schemaInfo, 1)
-                .then(() => console.log("Entity "+ entity +" initialized"))
-                .catch(() => "Error upon "+ entity +" initialization");
-    })
-}
-
 async function initializeDBSequences(){
-    const entities: [] = JSON.parse(process.env["ENTITY_LIST"]);
-    entities.forEach((entity) => {
-        const  schemaInfo = getSchemaInfo(entity);
-        const seq = createSequences(schemaInfo.sequence)
-            .then(() => console.log("Sequence "+ entity +" created"))
-            .catch((err) => console.log("Error "+err+" upon "+ entity +" sequence creation"));
-    })
+    const  sequenceList = getSequenceDefinition();
+    sequenceList.forEach((seq) => {
+        createSequences(seq)
+            .then(() => console.log("Sequence "+ seq +" created"))
+            .catch((err) => console.log("Error "+err+" upon "+ seq +" sequence creation"));
+    });
 }
 
 async function main() {
     try {
         await initializeDBSequences();
-        await initializeDB();
         await setupExpress();
         await startServer();
-
         console.log('Server started successfully');
     } catch (error) {
         console.error('Error starting server:', error);

@@ -12,8 +12,7 @@ import {NextFunction} from "express";
 
 export interface SchemaInfo {
     tablename: string,
-    columns: {name: string, type: ColumnType, defaultValue?: string}[],
-    sequence: string
+    columns: {name: string, type: ColumnType, defaultValue?: string, unique: boolean}[]
 }
 
 export let connection = {} as Connection;
@@ -33,14 +32,14 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number) {
         createdAt: Date;
 
         constructor() {
-            schema.columns.forEach(({name, type, defaultValue}) => {
+            schema.columns.forEach(({name, type, defaultValue, unique}) => {
                 this[name] = undefined
             });
         }
     }
 
-    schema.columns.forEach(({name, type, defaultValue}) => {
-        Column({type, default: () => defaultValue})(DynamicEntity.prototype, name);
+    schema.columns.forEach(({name, type, defaultValue, unique}) => {
+        Column({type, default: () => defaultValue, unique})(DynamicEntity.prototype, name);
     });
 
     if((!connectionManager.has(requestId.toString())) || (connectionManager.has(requestId.toString()) && (!connection.isConnected))){
@@ -96,4 +95,19 @@ export async function closeDBConnection(next: NextFunction, requestId: number) {
             console.log('DB conn already closed.');
         }
     }
+}
+
+export function getTableDefinition(entity: string){
+    let schemaInfo = {} as SchemaInfo;
+    schemaInfo = JSON.parse(process.env[entity.toUpperCase()+`_SCHEMA`]);
+    return schemaInfo;
+}
+
+export function getSequenceDefinition() {
+    const sequences = process.env[`DB_SEQUENCES`]
+    let sequenceList = [];
+    if (sequences) {
+        sequenceList = JSON.parse(sequences);
+    }
+    return sequenceList;
 }
