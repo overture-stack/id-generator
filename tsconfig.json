@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"module": "esm",
+		"module": "commonjs",
 		"target": "es6",
 		"outDir": "dist",
 		"sourceMap": true,
