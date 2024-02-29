@@ -7,6 +7,7 @@ import {
 	Entity,
 	getConnectionManager,
 	PrimaryGeneratedColumn,
+	Unique,
 } from 'typeorm';
 import { NextFunction } from 'express';
 import { z } from 'zod';
@@ -22,7 +23,7 @@ import * as config from '../config';
 export interface SchemaInfo {
 	tablename: string;
 	columns: { name: string; type: ColumnType; defaultValue?: string; unique?: boolean }[];
-	//index: [];
+	index: string[];
 }
 
 export let connection = {} as Connection;
@@ -32,6 +33,7 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number) {
 	@Entity({
 		name: schema.tablename,
 	})
+	@Unique('composite_index_' + schema.tablename, schema.index)
 	class DynamicEntity {
 		@PrimaryGeneratedColumn()
 		id: number;
@@ -43,7 +45,6 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number) {
 			/*schema.columns.forEach(({ name, type, defaultValue, unique }) => {
 				this[name] = undefined;
 			});*/
-
 			schema.columns.forEach(({ name, type, defaultValue, unique }) => {
 				//const key = name as keyof typeof DynamicEntity;
 				Column({ type, default: () => defaultValue, unique })(DynamicEntity.prototype, name);
@@ -120,13 +121,6 @@ export function getTableDefinition(entity: string) {
 
 export function getSequenceDefinition() {
 	const dbSeqArray = z.array(z.string());
-
-	const sequences = config.dbSequences; //process.env[`DB_SEQUENCES`];
-
-	/* let sequenceList = [];
-    if (sequences) {
-        sequenceList = JSON.parse(sequences);
-    }
-    return sequenceList;*/
+	const sequences = config.dbSequences;
 	return config.dbSequences;
 }

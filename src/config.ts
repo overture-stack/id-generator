@@ -131,6 +131,11 @@ export const schemaDef: z.ZodType<SchemaInfo> = z.object(
 				},
 			)
 			.nonempty({ message: 'Schema columns array should not be empty' }),
+		index: z
+			.array(z.string({ invalid_type_error: 'Please provide a list of column name string' }), {
+				invalid_type_error: 'Please provide a list of column name strings',
+			})
+			.nonempty({ message: 'A composite index is required for each entity' }),
 	},
 	{ invalid_type_error: 'Schema definition missing for an entity in the ENTITY_LIST' },
 );
