@@ -40,16 +40,6 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number) {
 
 		@CreateDateColumn({ name: 'created_at' })
 		createdAt: Date;
-
-		constructor() {
-			/*schema.columns.forEach(({ name, type, defaultValue, unique }) => {
-				this[name] = undefined;
-			});*/
-			schema.columns.forEach(({ name, type, defaultValue, unique }) => {
-				//const key = name as keyof typeof DynamicEntity;
-				Column({ type, default: () => defaultValue, unique })(DynamicEntity.prototype, name);
-			});
-		}
 	}
 
 	schema.columns.forEach(({ name, type, defaultValue, unique }) => {
