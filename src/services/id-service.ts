@@ -46,13 +46,10 @@ export async function getId(request: Request, response: Response, next: NextFunc
 	const release = await mutex.acquire();
 	try {
 		const entityType = request.params.entityType;
+		validateEntityType(entityType, next);
 		const keyCriteria = getSearchCriteria(entityType, request);
-
-		if (!Object.values(config.entityList).includes(entityType)) {
-			next(new IdGenerationError('invalid entity type'));
-		}
-
 		let id = await findId(keyCriteria, entityType, next, requestId);
+
 		if (!id) {
 			id = await createId(keyCriteria, entityType, next, requestId);
 		}
@@ -62,15 +59,26 @@ export async function getId(request: Request, response: Response, next: NextFunc
 	}
 }
 
+export async function findIdFor(request: Request, response: Response, next: NextFunction, requestId: number) {
+	const entityType = request.params.entityType;
+	validateEntityType(entityType, next);
+	const keyCriteria = getSearchCriteria(entityType, request);
+	return (await findId(keyCriteria, entityType, next, requestId)) || 'Id not found for this search criteria';
+}
+
+function validateEntityType(entityType: string, next: NextFunction) {
+	if (!Object.values(config.entityList).includes(entityType)) {
+		next(new IdGenerationError('invalid entity type'));
+	}
+}
+
 function getSearchCriteria(entity: string, request: Request) {
 	const requestParams = { ...request.params };
-
 	const keyCriteria = searchCriteria.parse(JSON.parse(process.env[entity.toUpperCase() + `_SEARCH`] || '[]'));
 	for (const param in requestParams) {
 		if (keyCriteria.hasOwnProperty(param)) {
 			keyCriteria[param] = requestParams[param];
 		}
 	}
-
 	return keyCriteria;
 }
