@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { NextFunction } from 'express';
 import { z } from 'zod';
-import * as config from '../config';
+import * as config from '../config.js';
 
 export interface SchemaInfo {
 	tablename: string;
@@ -88,8 +88,6 @@ export async function initializeDBSequences() {
 }
 
 export function getSequenceDefinition() {
-	const dbSeqArray = z.array(z.string());
-	const sequences = config.dbSequences;
 	return config.dbSequences;
 }
 

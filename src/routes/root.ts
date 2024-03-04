@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { findIdFor, getId } from '../services/id-service';
-import { closeDBConnection } from '../middlewares/datasource';
+import { findIdFor, getId } from '../services/id-service.js';
+import { closeDBConnection } from '../middlewares/datasource.js';
 
 export function root(request: Request, response: Response) {
 	const healthcheck = {

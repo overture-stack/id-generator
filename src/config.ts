@@ -100,7 +100,7 @@ export const dbSequences = z
 	.array(z.string(), {
 		invalid_type_error: 'DB_SEQUENCES should be an array',
 	})
-	.parse(JSON.parse(process.env[`DB_SEQUENCES`] || '[]')); // UK: check -> Unexpected token 'g', "g" is not valid JSON
+	.parse(JSON.parse(process.env[`DB_SEQUENCES`] || '[``]')); // UK: check -> Unexpected token 'g', "g" is not valid JSON
 
 export const schemaDef: z.ZodType<SchemaInfo> = z.object(
 	{

@@ -1,10 +1,14 @@
-import * as express from 'express';
-import { findIdForEntity, getIdForEntity, root } from './routes/root';
-import { defaultErrorHandler } from './middlewares/error-handler';
-import { initializeDBSequences } from './middlewares/datasource';
-import * as config from './config';
 
-const cors = require('cors');
+import { findIdForEntity, getIdForEntity, root } from './routes/root.js';
+import { defaultErrorHandler } from './middlewares/error-handler.js';
+import { initializeDBSequences } from './middlewares/datasource.js';
+import * as config from './config.js';
+import cors from 'cors'
+import  express from "express";
+
+//const cors = require('cors');
+//const app = express();
+//const cors = cors();
 const app = express();
 
 function setupExpress() {
@@ -21,7 +25,7 @@ function startServer() {
 	});
 }
 
-async function main() {
+/*async function main() {
 	try {
 		await initializeDBSequences();
 		setupExpress();
@@ -32,4 +36,9 @@ async function main() {
 	}
 }
 
-main();
+main();*/
+
+await initializeDBSequences();
+setupExpress();
+startServer();
+console.log('Server started successfully');

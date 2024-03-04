@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
-import { IdGenerationError } from '../middlewares/error-handler';
-import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource';
+import { IdGenerationError } from '../middlewares/error-handler.js';
+import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
 import { Mutex } from 'async-mutex';
-import * as config from '../config';
-import { searchCriteria } from '../config';
+import * as config from '../config.js';
+import { searchCriteria } from '../config.js';
 
 const mutex = new Mutex();
 
