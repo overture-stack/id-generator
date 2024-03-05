@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: Central id Management
+  version: 1.0.0
+#security:
+#  - bearerAuth: ['PROGRAMDATA-${programId}.WRITE', 'CLINICALSERVICE.WRITE']
+paths:
+  /{programId}/{submitterId}/{someOtherColumn}/{entityType}:
+    get:
+      tags:
+        - Central Id
+      summary: Get ARGO ID for any entity given program and submitter_sample_id
+      parameters:
+        - $ref: '#/components/parameters/PathProgramId'
+        - $ref: '#/components/parameters/PathSubmitterId'
+        - $ref: '#/components/parameters/PathEntityType'
+        - $ref: '#/components/parameters/PathSomeCol'
+      responses:
+        '200':
+          description: 'Create new or return an existing argo id.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+
+servers:
+  - url: /
+
+components:
+  parameters:
+    PathProgramId:
+      name: programId
+      description: Short Name of the program (ex. ABCD-EF)
+      in: path
+      required: true
+      schema:
+        type: string
+    PathSubmitterId:
+      name: submitterId
+      description: Submitter Id of the entity
+      in: path
+      required: true
+      schema:
+        type: string
+    PathEntityType:
+      name: entityType
+      description: Entity Type of the entity
+      in: path
+      required: true
+      schema:
+        type: string
+    PathSomeCol:
+      name: someOtherColumn
+      description: someOtherColumn of the entity
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    ServiceUnavailableError:
+      description: Endpoint service unavailable
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    ServerError:
+      description: Server error
+    ForbiddenError:
+      description: Access token has incorrect scopes
+    NotFoundError:
+      description: Requested resource was not found
+    FileStructureError:
+      description: File structure couldn't be parsed correctly, or has an invalid filename
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              code:
+                type: string
+                enum: ['TSV_PARSING_FAILED', 'INVALID_FILE_NAME']
+          examples:
+            TSVParseError:
+              value:
+                msg: 'string'
+                code: 'TSV_PARSING_FAILED'
+            InvalidFileNameError:
+              value:
+                msg: 'string'
+                code: 'INVALID_FILE_NAME'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Entity:
+      type: object
+      required:
+        - _id
+        - programId
+        - submitterId
+        - createdAt
+        - entityId
+      properties:
+        entityId:
+          type: string
+          description: the id for this entry of entity id
+
