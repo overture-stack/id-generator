@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
-import { IdGenerationError } from '../middlewares/error-handler.js';
+import {NextFunction, Request, response, Response} from 'express';
+import {InvalidEntityError} from '../middlewares/error-handler.js';
 import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
@@ -68,7 +68,8 @@ export async function findIdFor(request: Request, response: Response, next: Next
 
 function validateEntityType(entityType: string, next: NextFunction) {
 	if (!Object.values(config.entityList).includes(entityType)) {
-		next(new IdGenerationError('invalid entity type'));
+		response.status(400);
+		next(new InvalidEntityError('Invalid entity type'));
 	}
 }
 
