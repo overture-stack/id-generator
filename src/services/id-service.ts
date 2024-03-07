@@ -1,9 +1,10 @@
 import {NextFunction, Request, response, Response} from 'express';
-import {InvalidEntityError} from '../middlewares/error-handler.js';
+import {InvalidEntityError, InvalidRequestError} from '../middlewares/error-handler.js';
 import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
 import { searchCriteria } from '../config.js';
+import {RecordType} from "zod";
 
 const mutex = new Mutex();
 
@@ -48,6 +49,7 @@ export async function getId(request: Request, response: Response, next: NextFunc
 		const entityType = request.params.entityType;
 		validateEntityType(entityType, next);
 		const keyCriteria = getSearchCriteria(entityType, request);
+		validateSearchParams(keyCriteria, next);
 		let id = await findId(keyCriteria, entityType, next, requestId);
 
 		if (!id) {
@@ -63,13 +65,26 @@ export async function findIdFor(request: Request, response: Response, next: Next
 	const entityType = request.params.entityType;
 	validateEntityType(entityType, next);
 	const keyCriteria = getSearchCriteria(entityType, request);
+	validateSearchParams(keyCriteria, next);
 	return (await findId(keyCriteria, entityType, next, requestId)) || 'Id not found for this search criteria';
 }
 
 function validateEntityType(entityType: string, next: NextFunction) {
 	if (!Object.values(config.entityList).includes(entityType)) {
 		response.status(400);
-		next(new InvalidEntityError('Invalid entity type'));
+		next(new InvalidEntityError('Invalid entity type: '+entityType));
+	}
+}
+
+function validateSearchParams(searchCriteria: RecordType<string, string>, next: NextFunction){
+	var format = /[\^°<>#,*~!"§$%?®©¶\s]+/;
+	const keys = Object.keys(searchCriteria) as (keyof typeof searchCriteria)[];
+	for (let i = 0; i <= keys.length - 1; i++) {
+		const searchString = searchCriteria[keys[i]];
+		if(format.test(searchString) || searchString.length<1){
+			response.status(400);
+			next(new InvalidRequestError("Invalid value '"+searchString+"' for "+keys[i]))
+		}
 	}
 }
 

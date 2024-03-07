@@ -27,7 +27,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/responses/IdGenerationError'
+                - $ref: '#/components/responses/IdGenerationError'
+                - $ref: '#/components/responses/IdGenerationError'
+
   /{programId}/{submitterId}/{someOtherColumn}/{entityType}/find:
     get:
       tags:
@@ -46,11 +48,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Entity'
         '400':
-          description: 'Invalid Entity Error.'
+          description: 'Invalid Entity or Invalid Value for Request Param.'
           content:
             application/json:
               schema:
-                $ref: '#/components/responses/IdGenerationError'
+                - $ref: '#/components/responses/IdGenerationError'
+                - $ref: '#/components/responses/IdGenerationError'
 
 servers:
   - url: /
@@ -99,6 +102,20 @@ components:
               code:
                 type: string
                 enum: [ 'INVALID_ENTITY']
+              status:
+                type: string
+    InvalidRequestError:
+      description: Value of the request param is invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              code:
+                type: string
+                enum: [ 'INVALID_VALUE' ]
               status:
                 type: string
 

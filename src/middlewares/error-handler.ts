@@ -8,13 +8,19 @@ export function defaultErrorHandler(err: IdGenerationError, req: Request, res: R
 
 	res.json({
 		status: err.name,
-		message: err.message+' - '+req.params.entityType,
+		message: err.message,
 		code: res.statusCode
 	});
 }
 
 
 export class IdGenerationError extends Error {
+	constructor(message: string) {
+		super(message);
+	}
+}
+
+export class InvalidRequestError extends IdGenerationError {
 	constructor(message: string) {
 		super(message);
 	}
