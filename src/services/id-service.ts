@@ -5,7 +5,6 @@ import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
 import { searchCriteria } from '../config.js';
 import {date, RecordType} from "zod";
-import {DateUtils} from "typeorm/util/DateUtils";
 
 const mutex = new Mutex();
 
