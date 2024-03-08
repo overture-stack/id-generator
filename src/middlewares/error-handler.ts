@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
 export function defaultErrorHandler(err: IdGenerationError, req: Request, res: Response, next: NextFunction) {
-
 	if (res.headersSent) {
 		return next(err);
 	}
@@ -9,10 +8,9 @@ export function defaultErrorHandler(err: IdGenerationError, req: Request, res: R
 	res.json({
 		status: err.name,
 		message: err.message,
-		code: res.statusCode
+		code: res.statusCode,
 	});
 }
-
 
 export class IdGenerationError extends Error {
 	constructor(message: string) {
@@ -27,6 +25,13 @@ export class InvalidRequestError extends IdGenerationError {
 }
 
 export class InvalidEntityError extends IdGenerationError {
+	constructor(message: string) {
+		super(message);
+	}
+}
+
+
+export class UnauthorizedError extends IdGenerationError {
 	constructor(message: string) {
 		super(message);
 	}

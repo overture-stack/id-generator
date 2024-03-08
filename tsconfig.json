@@ -9,7 +9,7 @@
 		"strict": true,
 		"strictPropertyInitialization": false,
 		"useUnknownInCatchVariables": false,
-		"moduleResolution":"node",
+		"moduleResolution": "node",
 		"allowSyntheticDefaultImports": true
 	},
 	"exclude": ["node_modules"]

@@ -40,7 +40,8 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number) {
 		Column({ type, default: () => defaultValue, unique })(DynamicEntity.prototype, key);
 	});
 
-	const isConnected = connectionManager.has(requestId.toString()) && connectionManager.get(requestId.toString()).isConnected;
+	const isConnected =
+		connectionManager.has(requestId.toString()) && connectionManager.get(requestId.toString()).isConnected;
 	if (!isConnected) {
 		connection = await createConnection({
 			type: 'postgres',

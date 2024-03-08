@@ -147,7 +147,7 @@ entityList.forEach((entity) => {
 export const searchCriteria = z.record(
 	z.string({ invalid_type_error: 'Search criteria key should be a string' }),
 	z.string({ invalid_type_error: 'Search criteria value should be a string' }),
-	{ invalid_type_error: 'Search criteria missing for an entity in the ENTITY_LIST'},
+	{ invalid_type_error: 'Search criteria missing for an entity in the ENTITY_LIST' },
 );
 
 entityList.forEach((entity) => {

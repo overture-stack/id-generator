@@ -101,7 +101,7 @@ components:
                 type: string
               code:
                 type: string
-                enum: [ 'INVALID_ENTITY']
+                enum: ['INVALID_ENTITY']
               status:
                 type: string
     InvalidRequestError:
@@ -115,7 +115,7 @@ components:
                 type: string
               code:
                 type: string
-                enum: [ 'INVALID_VALUE' ]
+                enum: ['INVALID_VALUE']
               status:
                 type: string
 
@@ -137,4 +137,3 @@ components:
         entityId:
           type: string
           description: the id for this entry of entity id
-
