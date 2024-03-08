@@ -4,14 +4,15 @@ import { closeDBConnection, getTableDefinition, prepareDataSource } from '../mid
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
 import { searchCriteria } from '../config.js';
-import {RecordType} from "zod";
+import {date, RecordType} from "zod";
+import {DateUtils} from "typeorm/util/DateUtils";
 
 const mutex = new Mutex();
 
 // create new id
 async function createId(searchCriteria: {}, entityType: string, next: NextFunction, requestId: number) {
 	console.log('******** CREATE CALLED :' + requestId);
-	const repo = await prepareDataSource(getTableDefinition(entityType), requestId);
+	const repo = await prepareDataSource(getTableDefinition(entityType), requestId, config.dbSync);
 
 	const savedEntity = await repo.save(searchCriteria);
 	await closeDBConnection(next, requestId).then(() => console.log('DB connection closed'));
@@ -22,7 +23,7 @@ async function createId(searchCriteria: {}, entityType: string, next: NextFuncti
 async function findId(searchCriteria: {}, entityType: string, next: NextFunction, requestId: number) {
 	console.log('******** FIND CALLED :' + requestId);
 	const schemaInfo = getTableDefinition(entityType);
-	const repo = await prepareDataSource(schemaInfo, requestId);
+	const repo = await prepareDataSource(schemaInfo, requestId, config.dbSync);
 
 	const keys = Object.keys(searchCriteria) as (keyof typeof searchCriteria)[]; //UK check this
 
@@ -59,6 +60,7 @@ export async function getId(request: Request, response: Response, next: NextFunc
 	} finally {
 		release();
 	}
+
 }
 
 export async function findIdFor(request: Request, response: Response, next: NextFunction, requestId: number) {

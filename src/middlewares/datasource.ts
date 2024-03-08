@@ -10,7 +10,6 @@ import {
 	Unique,
 } from 'typeorm';
 import { NextFunction } from 'express';
-import { z } from 'zod';
 import * as config from '../config.js';
 
 export interface SchemaInfo {
@@ -22,7 +21,7 @@ export interface SchemaInfo {
 export let connection = {} as Connection;
 const connectionManager = getConnectionManager();
 
-export async function prepareDataSource(schema: SchemaInfo, requestId: number) {
+export async function prepareDataSource(schema: SchemaInfo, requestId: number, dbSync: boolean) {
 	@Entity({
 		name: schema.tablename,
 	})
@@ -51,12 +50,11 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number) {
 			port: config.dbPort,
 			database: config.dbName,
 			schema: config.dbSchema,
-			synchronize: config.dbSync,
+			synchronize: dbSync,
 			logging: config.logging,
 			entities: [DynamicEntity],
 		});
 	}
-
 	const repository = connection.getRepository(DynamicEntity);
 	return repository;
 }
@@ -89,6 +87,17 @@ export async function initializeDBSequences() {
 
 export function getSequenceDefinition() {
 	return config.dbSequences;
+}
+
+export async function initializeDB(){
+	const entities = config.entityList;
+	const dbInitializationPromises = entities.map((entity) =>{
+		const  schemaInfo = getTableDefinition(entity);
+		return prepareDataSource(schemaInfo, 1, true)
+			.then(() => console.log("Entity "+ entity +" initialized"))
+			.catch(() => "Error upon "+ entity +" initialization");
+	});
+	await Promise.all(dbInitializationPromises);
 }
 
 export async function getDBConnection(name: string) {

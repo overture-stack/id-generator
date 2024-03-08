@@ -1,7 +1,7 @@
 
 import { findIdForEntity, getIdForEntity, root } from './routes/root.js';
 import { defaultErrorHandler } from './middlewares/error-handler.js';
-import { initializeDBSequences } from './middlewares/datasource.js';
+import {initializeDB, initializeDBSequences} from './middlewares/datasource.js';
 import * as config from './config.js';
 import cors from 'cors'
 import  express from "express";
@@ -47,6 +47,7 @@ function startServer() {
 main();*/
 
 await initializeDBSequences();
+await initializeDB();
 setupExpress();
 startServer();
 console.log('Server started successfully');
