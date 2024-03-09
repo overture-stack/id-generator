@@ -105,7 +105,7 @@ export const dbSequences = z
 export const schemaDef: z.ZodType<SchemaInfo> = z.object(
 	{
 		tablename: z
-			.string({ required_error: 'table name is required' })
+			.string({ required_error: 'table name is required', invalid_type_error:"invalid table name "})
 			.trim()
 			.min(1, { message: 'table name cannot be empty' }),
 		columns: z
