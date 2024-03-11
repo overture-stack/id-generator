@@ -1,6 +1,7 @@
+
 import { findIdForEntity, getIdForEntity, root } from './routes/root.js';
 import { defaultErrorHandler } from './middlewares/error-handler.js';
-import { initializeDBSequences } from './middlewares/datasource.js';
+import {initializeDB, initializeDBSequences} from './middlewares/datasource.js';
 import * as config from './config.js';
 import cors from 'cors';
 import express from 'express';
@@ -12,7 +13,6 @@ const app = express();
 
 function setupExpress() {
 	app.use(cors({ origin: true }));
-
 	app.route('/').get(root);
 	app.use(egoAuthHandler);
 	app.route(config.requestRoute).get(getIdForEntity);
@@ -29,6 +29,7 @@ function startServer() {
 }
 
 await initializeDBSequences();
+await initializeDB();
 setupExpress();
 startServer();
 console.log('Server started successfully');
