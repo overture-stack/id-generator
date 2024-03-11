@@ -30,8 +30,13 @@ export class InvalidEntityError extends IdGenerationError {
 	}
 }
 
-
 export class UnauthorizedError extends IdGenerationError {
+	constructor(message: string) {
+		super(message);
+	}
+}
+
+export class ForbiddenError extends IdGenerationError {
 	constructor(message: string) {
 		super(message);
 	}

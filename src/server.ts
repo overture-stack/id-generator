@@ -6,7 +6,7 @@ import cors from 'cors';
 import express from 'express';
 import yaml from 'yamljs';
 import * as swaggerUi from 'swagger-ui-express';
-import {egoAuthHandler} from "./middlewares/auth.js";
+import { egoAuthHandler } from './middlewares/auth.js';
 
 const app = express();
 
@@ -19,7 +19,6 @@ function setupExpress() {
 	app.route(config.requestRoute + '/find').get(findIdForEntity);
 	app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(yaml.load('src/resources/swagger.yaml')));
 	app.use(defaultErrorHandler);
-
 }
 
 function startServer() {

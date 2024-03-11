@@ -13,7 +13,6 @@ export function root(request: Request, response: Response) {
 export function getIdForEntity(request: Request, response: Response, next: NextFunction) {
 	const requestId = Date.now();
 	console.log(requestId);
-	console.log()
 	return getId(request, response, next, requestId)
 		.then((id) => response.status(200).json(id))
 		.catch((err) => {

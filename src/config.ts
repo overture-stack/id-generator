@@ -2,8 +2,7 @@ import * as dotenv from 'dotenv';
 import { z } from 'zod';
 import { SchemaInfo } from './middlewares/datasource';
 
-const config = dotenv.config();
-if (config.error) {
+if (dotenv.config().error) {
 	console.log(`Error loading environment variables, aborting.`);
 	process.exit(1);
 }
@@ -105,7 +104,7 @@ export const dbSequences = z
 export const schemaDef: z.ZodType<SchemaInfo> = z.object(
 	{
 		tablename: z
-			.string({ required_error: 'table name is required', invalid_type_error:"invalid table name "})
+			.string({ required_error: 'table name is required', invalid_type_error: 'invalid table name ' })
 			.trim()
 			.min(1, { message: 'table name cannot be empty' }),
 		columns: z
@@ -153,3 +152,21 @@ export const searchCriteria = z.record(
 entityList.forEach((entity) => {
 	searchCriteria.parse(JSON.parse(process.env[entity.toUpperCase() + `_SEARCH`] || '[]'));
 });
+
+
+export const egoUrl = z
+	.string({
+		invalid_type_error: 'EGO_URL should be a string',
+	})
+	.parse(process.env['EGO_URL']);
+
+export const scopes = z
+	.array(
+		z.string({
+			invalid_type_error: 'SCOPES should be an array of strings',
+		}),
+		{
+			invalid_type_error: 'SCOPES should be an array of strings',
+		},
+	)
+	.parse(JSON.parse(process.env['SCOPES'] || '[]'));

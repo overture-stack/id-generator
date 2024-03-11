@@ -10,7 +10,6 @@ import {
 	Unique,
 } from 'typeorm';
 import { NextFunction } from 'express';
-import { z } from 'zod';
 import * as config from '../config.js';
 
 export interface SchemaInfo {
