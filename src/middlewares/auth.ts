@@ -19,7 +19,8 @@ const getKey = memoize(
 );
 
 const verifyEgoToken = async (token: string, egoURL: string) => {
-	const key = await getKey(egoUrl);
+	//const key = await getKey(egoUrl);
+	const key = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtPZ5ZeRS2744CMCHohZBbwEAgF0qu4BjAchNxWfSuyCCsa4LeyjkF/JOKqiOP522ULFlzEirfmntGYluxKNDr40JIMPBx6qnASZvT83mY9kbMkqeTuZ2nrRf9Z2o4aTBEyjWbKY2plWGML9WGUzOBUqMXxDc4/8FGFXzOZdmn2RItfD+hQM6F8RHWTE6P9+h4S/oPhqZ+4Ih3Jrk6BPG0Fv1u+9Dd7f7lptDaXALCEkuMqfwEwcpSUppkmErgGJ5Ujg3rtcbdFwgcr+cVaUkmZmSXn60JG0usiAO/d19DHa8CzETGlU4vaEvDm43h9ZpAOMIkoz8gos9IqYuBsYylQIDAQAB'
 	return jwt.verify(token, key);
 };
 

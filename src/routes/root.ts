@@ -1,6 +1,19 @@
 import { NextFunction, Request, Response } from 'express';
 import { findIdFor, getId } from '../services/id-service.js';
 import { closeDBConnection } from '../middlewares/datasource.js';
+import {code_verifier, newClient} from "../server.js";
+
+
+export async function authUtil(request: Request, response: Response) {
+	console.log("health check");
+
+	const params = newClient.callbackParams(request);
+	const tokenSet = await newClient.callback('https://client.example.com/callback', params, { code_verifier });
+	console.log('received and validated tokens %j', tokenSet);
+	console.log('validated ID Token claims %j', tokenSet.claims());
+
+	//response.status(200).send("it's ok");
+}
 
 export function root(request: Request, response: Response) {
 	const healthcheck = {

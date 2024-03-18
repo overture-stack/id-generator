@@ -170,3 +170,12 @@ export const scopes = z
 		},
 	)
 	.parse(JSON.parse(process.env['SCOPES'] || '[]'));
+
+
+export const AUTH_TYPE = z
+	.string({
+		required_error: 'property AUTH_TYPE is required',
+	})
+	.trim()
+	.min(1, { message: 'AUTH_TYPE cannot be empty' })
+	.parse(process.env.PORT);
