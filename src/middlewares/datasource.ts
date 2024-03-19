@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { NextFunction } from 'express';
 import * as config from '../config.js';
+import {getSchemaDef} from "../config-validator";
 
 export interface SchemaInfo {
 	tablename: string;
@@ -68,7 +69,8 @@ export async function createSequences(sql: string) {
 }
 
 export function getTableDefinition(entity: string) {
-	const schema = config.schemaDef.parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''));
+	//const schema = config.schemaDef.parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''));
+	const schema = getSchemaDef(entity.toUpperCase() + `_SCHEMA`).parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''));
 	return schema;
 }
 
