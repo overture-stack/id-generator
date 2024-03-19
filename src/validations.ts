@@ -26,7 +26,7 @@ function getRequiredString(){}
 
 
 export const getRequiredEnvNumber = (name: string): number => {
-    const value = getRequiredEnvVar(name);
+    const value = parseInt(getRequiredEnvVar(name));
     const numberValue = z.number().finite().safeParse(value);
 
     if(!numberValue.success) {

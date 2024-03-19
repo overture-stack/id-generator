@@ -125,4 +125,4 @@ export const scopes = z
 			invalid_type_error: 'SCOPES should be an array of strings',
 		},
 	)
-	.parse(JSON.parse(process.env[`SCOPES`] || ""));
+	.parse(JSON.parse(process.env[`SCOPES`] || '[]'));
