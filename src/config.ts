@@ -1,13 +1,10 @@
 import * as dotenv from 'dotenv';
-import {z, ZodString} from 'zod';
-import { SchemaInfo } from './middlewares/datasource.js';
 import {
 	getArray, getRecord,
 	getRequiredArray,
 	getRequiredNumber,
 	getRequiredString,
 	getSchemaDef,
-	getString,
 	getUrl
 } from "./config-validator";
 
