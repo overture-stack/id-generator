@@ -14,7 +14,7 @@ const app = express();
 function setupExpress() {
 	app.use(cors({ origin: true }));
 	app.route('/').get(root);
-	app.use(egoAuthHandler);
+	//app.use(egoAuthHandler);
 	app.route(config.requestRoute).get(getIdForEntity);
 	app.route(config.requestRoute + '/find').get(findIdForEntity);
 	app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(yaml.load('src/resources/swagger.yaml')));

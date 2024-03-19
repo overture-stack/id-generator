@@ -21,23 +21,27 @@ export class IdGenerationError extends Error {
 export class InvalidRequestError extends IdGenerationError {
 	constructor(message: string) {
 		super(message);
+		this.name = 'InvalidRequestError';
 	}
 }
 
 export class InvalidEntityError extends IdGenerationError {
 	constructor(message: string) {
 		super(message);
+		this.name = 'InvalidEntityError';
 	}
 }
 
 export class UnauthorizedError extends IdGenerationError {
 	constructor(message: string) {
 		super(message);
+		this.name = 'UnauthorizedError';
 	}
 }
 
 export class ForbiddenError extends IdGenerationError {
 	constructor(message: string) {
 		super(message);
+		this.name = 'ForbiddenError';
 	}
 }

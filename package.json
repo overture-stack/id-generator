@@ -5,19 +5,18 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"clean": "rimraf dist",
-		"prettify": "npx prettier . --write",
 		"build": "tsc",
+		"clean": "rimraf dist",
+		"dev": "npm-run-all clean build start",
+		"prettify": "npx prettier . --write",
 		"start::prod": "node dist/server.js",
 		"start": "tsc-watch --onSuccess \"node dist/server.js\"",
-		"dev": "npm-run-all clean build start"
+		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/icgc-argo/id-generator.git"
 	},
-	"author": "ummulkiramr",
 	"license": "ISC",
 	"bugs": {
 		"url": "https://github.com/icgc-argo/id-generator/issues"

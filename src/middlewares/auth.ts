@@ -45,9 +45,8 @@ export async function egoAuthHandler(req: Request, res: Response, next: NextFunc
 		res.statusCode=401;
 		next(new UnauthorizedError('You need to be authenticated for this request.'));
 	} else {
-		// UK check scopes
 		const authToken = jwt.decode(bearerToken) as { [key: string]: any };
-		console.log('auth Token: ' + authToken.toString());
+		//console.log('auth Token: ' + authToken.toString());
 		const scopes = authToken['context']['scope'];
 
 		config.scopes.forEach((scope) => {
