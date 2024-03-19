@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import {z, ZodString} from 'zod';
 import { SchemaInfo } from './middlewares/datasource.js';
-import {getRequiredEnvNumber, getRequiredEnvString, validateString} from "./validations.js";
+import {getRequiredEnvNumber, getRequiredEnvString} from "./validations.js";
 
 if (dotenv.config().error) {
 	console.log(`Error loading environment variables, aborting.`);
@@ -9,7 +9,7 @@ if (dotenv.config().error) {
 }
 
 
-export const dbHost = validateString('DB_HOST');//getRequiredEnvString('DB_HOST');
+export const dbHost = getRequiredEnvString('DB_HOST');//getRequiredEnvString('DB_HOST');
 
 export const dbUsername = getRequiredEnvString('DB_USERNAME');
 

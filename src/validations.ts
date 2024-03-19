@@ -1,6 +1,6 @@
 import {z, ZodArray, ZodString} from "zod";
 
-export function validateString(name: string){
+/*export function validateString(name: string){
     return z
         .string({
             //required_error: 'property '+name+ ' is required',
@@ -9,17 +9,18 @@ export function validateString(name: string){
         .trim()
         .min(1, { message: name+ ' cannot be empty' })
         .parse(getRequiredEnvVar(name));
-}
+}*/
 
 
 
 function getRequiredEnvVar(name: string){
-    const property = process.env[name] as string;
+    const property = process.env[name] as any;
     if(!property || property.trim().length==0){
         throw new Error("config file is missing property "+name);
     }
-
+    return property;
 }
+
 function getRequiredNumber(){}
 function getRequiredString(){}
 
