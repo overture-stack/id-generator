@@ -7,7 +7,7 @@ import cors from 'cors';
 import express from 'express';
 import yaml from 'yamljs';
 import * as swaggerUi from 'swagger-ui-express';
-import { egoAuthHandler } from './middlewares/auth.js';
+import { egoAuthHandler } from './middlewares/ego_auth';
 import {generators, Issuer} from "openid-client";
 
 const app = express();

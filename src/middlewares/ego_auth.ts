@@ -62,4 +62,4 @@ export async function egoAuthHandler(req: Request, res: Response, next: NextFunc
 	next();
 }
 
-
+//UK: check memoize and axios
