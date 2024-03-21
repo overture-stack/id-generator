@@ -3,8 +3,8 @@ import {InvalidEntityError, InvalidRequestError} from '../middlewares/error-hand
 import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
-import { searchCriteria } from '../config.js';
 import {date, RecordType} from "zod";
+import {getRecord} from "../config-validator.js";
 
 const mutex = new Mutex();
 
@@ -24,7 +24,7 @@ async function findId(searchCriteria: {}, entityType: string, next: NextFunction
 	const schemaInfo = getTableDefinition(entityType);
 	const repo = await prepareDataSource(schemaInfo, requestId, config.dbSync);
 
-	const keys = Object.keys(searchCriteria) as (keyof typeof searchCriteria)[]; //UK check this
+	const keys = Object.keys(searchCriteria) as (keyof typeof searchCriteria)[];
 
 	let query = repo
 		.createQueryBuilder(schemaInfo.tablename)
@@ -90,8 +90,9 @@ function validateSearchParams(searchCriteria: RecordType<string, string>, next: 
 }
 
 function getSearchCriteria(entity: string, request: Request) {
+	const property = entity.toUpperCase() + `_SEARCH`;
 	const requestParams = { ...request.params };
-	const keyCriteria = searchCriteria.parse(JSON.parse(process.env[entity.toUpperCase() + `_SEARCH`] || '[]'));
+	const keyCriteria = getRecord(property).parse(JSON.parse(process.env[property] || '[]'));
 	for (const param in requestParams) {
 		if (keyCriteria.hasOwnProperty(param)) {
 			keyCriteria[param] = requestParams[param];

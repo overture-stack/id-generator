@@ -1,5 +1,5 @@
 
-import {authUtil, findIdForEntity, getIdForEntity, root} from './routes/root.js';
+import {findIdForEntity, getIdForEntity, root} from './routes/root.js';
 import { defaultErrorHandler } from './middlewares/error-handler.js';
 import {initializeDB, initializeDBSequences} from './middlewares/datasource.js';
 import * as config from './config.js';
@@ -7,16 +7,18 @@ import cors from 'cors';
 import express from 'express';
 import yaml from 'yamljs';
 import * as swaggerUi from 'swagger-ui-express';
-import { egoAuthHandler } from './middlewares/ego_auth';
+import { egoAuthHandler } from './middlewares/ego_auth.js';
 import {generators, Issuer} from "openid-client";
+import {keycloakAuthHandler} from "./middlewares/keycloak_auth.js";
 
 const app = express();
 
 function setupExpress() {
 	app.use(cors({ origin: true }));
 	app.route('/').get(root);
-	app.use(egoAuthHandler);
-	app.route('/authUtil').get(authUtil);
+	//app.use(egoAuthHandler);
+	app.use(keycloakAuthHandler);
+	//app.route('/authUtil').get(authUtil);
 	app.route(config.requestRoute).get(getIdForEntity);
 	app.route(config.requestRoute + '/find').get(findIdForEntity);
 	app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(yaml.load('src/resources/swagger.yaml')));
@@ -31,7 +33,7 @@ function startServer() {
 }
 
 
-export interface IntrospectionResponseLocal {
+/*export interface IntrospectionResponseLocal {
 	active: boolean;
 	client_id?: string;
 	exp?: number;
@@ -79,15 +81,15 @@ const access_token: string  = tokenSet.access_token || '';
 const tokenjson = await client.introspect(tokenSet.access_token|| '');
 console.log("iss: "+tokenjson.iss);
 console.log("scope: "+tokenjson.scope);
-console.log("aud: "+tokenjson.aud);
+console.log("aud: "+tokenjson.aud);*/
 
-// await initializeDBSequences();
-// await initializeDB();
-// setupExpress();
-// startServer();
-// console.log('Server started successfully');
+await initializeDBSequences();
+await initializeDB();
+setupExpress();
+startServer();
+console.log('Server started successfully');
 
-const tokenPerm = await client.grant({
+/*const tokenPerm = await client.grant({
 	grant_type: 'urn:ietf:params:oauth:grant-type:uma-ticket',
 	audience: 'IDGeneration',
 	//response_mode: 'decision',
@@ -102,6 +104,7 @@ console.log("tokenPermJson rsname:"+tokenPermJson.authorization['permissions'][0
 console.log("tokenPermJson auth:"+JSON.stringify(tokenPermJson));
 
 
+// -- some user auth (login flow) stuff
 export const code_verifier = generators.codeVerifier();
 const code_challenge = generators.codeChallenge(code_verifier);
 
@@ -119,5 +122,5 @@ newClient.authorizationUrl({
 	resource: 'https://my.api.example.com/resource/32178',
 	code_challenge,
 	code_challenge_method: 'S256',
-});
+});*/
 

@@ -1,3 +1,4 @@
+/*
 
 import { NextFunction, Request, Response } from 'express';
 import { ForbiddenError, UnauthorizedError } from './error-handler.js';
@@ -6,7 +7,7 @@ import memoize from 'memoizee';
 import axios from 'axios';
 import ms from 'ms';
 import * as config from '../config.js';
-import {AUTH_TYPE, egoUrl} from "../config.js";
+import {authScheme, egoUrl} from "../config.js";
 
 const getKey = memoize(
     async (egoURL: string) => {
@@ -27,7 +28,7 @@ const verifyEgoToken = async (token: string, egoURL: string) => {
 
 export async function egoAuthHandler(req: Request, res: Response, next: NextFunction) {
 
-    if(AUTH_TYPE === "EGO"){
+    if(authScheme === "EGO"){
 
         console.log('auth handler called');
 
@@ -68,3 +69,4 @@ export async function egoAuthHandler(req: Request, res: Response, next: NextFunc
 }
 
 
+*/
