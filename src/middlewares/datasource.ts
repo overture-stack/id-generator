@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { NextFunction } from 'express';
 import * as config from '../config.js';
-import {getSchemaDef} from "../config-validator.js";
+import { getSchemaDef } from '../config-validator.js';
 
 export interface SchemaInfo {
 	tablename: string;
@@ -70,7 +70,9 @@ export async function createSequences(sql: string) {
 
 export function getTableDefinition(entity: string) {
 	//const schema = config.schemaDef.parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''));
-	const schema = getSchemaDef(entity.toUpperCase() + `_SCHEMA`).parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''));
+	const schema = getSchemaDef(entity.toUpperCase() + `_SCHEMA`).parse(
+		JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''),
+	);
 	return schema;
 }
 
@@ -92,13 +94,13 @@ export function getSequenceDefinition() {
 	return config.dbSequences;
 }
 
-export async function initializeDB(){
+export async function initializeDB() {
 	const entities = config.entityList;
-	const dbInitializationPromises = entities.map((entity) =>{
-		const  schemaInfo = getTableDefinition(entity);
+	const dbInitializationPromises = entities.map((entity) => {
+		const schemaInfo = getTableDefinition(entity);
 		return prepareDataSource(schemaInfo, 1, true)
-			.then(() => console.log("Entity "+ entity +" initialized"))
-			.catch(() => "Error upon "+ entity +" initialization");
+			.then(() => console.log('Entity ' + entity + ' initialized'))
+			.catch(() => 'Error upon ' + entity + ' initialization');
 	});
 	await Promise.all(dbInitializationPromises);
 }

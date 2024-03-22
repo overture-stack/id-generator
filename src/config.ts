@@ -1,20 +1,21 @@
 import * as dotenv from 'dotenv';
 import {
-	getArray, getRecord,
+	getArray,
+	getRecord,
 	getRequiredArray,
 	getRequiredNumber,
 	getRequiredString,
-	getSchemaDef, getString,
-	getUrl
-} from "./config-validator.js";
+	getSchemaDef,
+	getString,
+	getUrl,
+} from './config-validator.js';
 
 if (dotenv.config().error) {
 	console.log(`Error loading environment variables, aborting.`);
 	process.exit(1);
 }
 
-
-export const dbHost = getRequiredString('DB_HOST');//getRequiredEnvString('DB_HOST');
+export const dbHost = getRequiredString('DB_HOST'); //getRequiredEnvString('DB_HOST');
 export const dbUsername = getRequiredString('DB_USERNAME');
 export const dbPassword = getRequiredString('DB_PASSWORD');
 export const dbSchema = getRequiredString('DB_SCHEMA');
@@ -40,13 +41,10 @@ export const scopes = getRequiredArray('EGO_SCOPES');
 
 export const dbSequences = getArray('DB_SEQUENCES');
 
-
 entityList.forEach((entity) => {
 	getSchemaDef(entity).parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || '[]'));
 });
 
-
 entityList.forEach((entity) => {
 	getRecord(entity).parse(JSON.parse(process.env[entity.toUpperCase() + `_SEARCH`] || '[]'));
 });
-

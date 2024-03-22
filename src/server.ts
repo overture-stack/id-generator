@@ -1,14 +1,13 @@
-
-import {findIdForEntity, getIdForEntity, root} from './routes/root.js';
+import { findIdForEntity, getIdForEntity, root } from './routes/root.js';
 import { defaultErrorHandler } from './middlewares/error-handler.js';
-import {initializeDB, initializeDBSequences} from './middlewares/datasource.js';
+import { initializeDB, initializeDBSequences } from './middlewares/datasource.js';
 import * as config from './config.js';
 import cors from 'cors';
 import express from 'express';
 import yaml from 'yamljs';
 import * as swaggerUi from 'swagger-ui-express';
 import { egoAuthHandler } from './middlewares/ego_auth.js';
-import {keycloakAuthHandler} from "./middlewares/keycloak_auth.js";
+import { keycloakAuthHandler } from './middlewares/keycloak_auth.js';
 
 const app = express();
 
@@ -36,4 +35,3 @@ await initializeDB();
 setupExpress();
 startServer();
 console.log('Server started successfully');
-

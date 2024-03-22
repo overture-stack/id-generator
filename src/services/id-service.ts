@@ -1,10 +1,10 @@
-import {NextFunction, Request, response, Response} from 'express';
-import {InvalidEntityError, InvalidRequestError} from '../middlewares/error-handler.js';
+import { NextFunction, Request, response, Response } from 'express';
+import { InvalidEntityError, InvalidRequestError } from '../middlewares/error-handler.js';
 import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
-import {date, RecordType} from "zod";
-import {getRecord} from "../config-validator.js";
+import { date, RecordType } from 'zod';
+import { getRecord } from '../config-validator.js';
 
 const mutex = new Mutex();
 
@@ -59,7 +59,6 @@ export async function getId(request: Request, response: Response, next: NextFunc
 	} finally {
 		release();
 	}
-
 }
 
 export async function findIdFor(request: Request, response: Response, next: NextFunction, requestId: number) {
@@ -73,18 +72,18 @@ export async function findIdFor(request: Request, response: Response, next: Next
 function validateEntityType(entityType: string, next: NextFunction) {
 	if (!Object.values(config.entityList).includes(entityType)) {
 		response.status(400);
-		next(new InvalidEntityError('Invalid entity type: '+entityType));
+		next(new InvalidEntityError('Invalid entity type: ' + entityType));
 	}
 }
 
-function validateSearchParams(searchCriteria: RecordType<string, string>, next: NextFunction){
+function validateSearchParams(searchCriteria: RecordType<string, string>, next: NextFunction) {
 	var format = /[\^°<>#,*~!"§$%?®©¶\s]+/;
 	const keys = Object.keys(searchCriteria) as (keyof typeof searchCriteria)[];
 	for (let i = 0; i <= keys.length - 1; i++) {
 		const searchString = searchCriteria[keys[i]];
-		if(format.test(searchString) || searchString.length<1){
+		if (format.test(searchString) || searchString.length < 1) {
 			response.status(400);
-			next(new InvalidRequestError("Invalid value '"+searchString+"' for "+keys[i]))
+			next(new InvalidRequestError("Invalid value '" + searchString + "' for " + keys[i]));
 		}
 	}
 }
