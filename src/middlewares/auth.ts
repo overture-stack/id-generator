@@ -1,4 +1,6 @@
 
+
+/// ego-KC switch
 export async function egoAuthHandler(){
 
 }
