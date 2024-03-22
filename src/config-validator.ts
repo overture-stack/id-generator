@@ -7,7 +7,7 @@ function getRequiredEnvVar(name: string) {
 		throw new Error('config file is missing property ' + name);
 	}
 	return property;
-}
+};
 
 export const getRequiredNumber = (name: string): number => {
 	const value = parseInt(getRequiredEnvVar(name));

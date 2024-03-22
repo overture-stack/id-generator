@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { Issuer } from 'openid-client';
 import { clientId, clientSecret, keycloakResource, keycloakUrl } from '../config.js';
-import { ForbiddenError } from './error-handler.js';
-import { isJwt } from './auth.js';
+import {ForbiddenError, UnauthorizedError} from './error-handler.js';
+import {extractHeaderToken, isJwt} from './auth.js';
 import memoize from 'memoizee';
 import axios from 'axios';
 import ms from 'ms';
@@ -43,28 +43,34 @@ const client = new issuer.Client({
 
 export async function keycloakAuthHandler(req: Request, res: Response, next: NextFunction) {
 	console.log('keycloak auth handler');
-	const { authorization: authorizationHeader } = req.headers;
-	const { authorization: authorizationBody } = req.body || {};
+	const {authorization: authorizationHeader} = req.headers;
+	const {authorization: authorizationBody} = req.body || {};
 
 	const authorization = authorizationHeader || authorizationBody;
 	const token: string = authorization ? authorization.split(' ')[1] : req.query.key;
-
-	if (!(await hasPermissions(token))) {
-		res.statusCode = 403;
-		next(new ForbiddenError('Forbidden. Permission Denied'));
+	//const token = extractHeaderToken(req);
+	try {
+		if (!(await hasPermissions(token))) {
+			res.statusCode = 403;
+			next(new ForbiddenError('Forbidden. Permission Denied'));
+		}
+	} catch (e) {
+		console.log(e);
+		res.statusCode = 401;
+		next(new UnauthorizedError('You need to be authenticated for this request.'));
 	}
 	next();
 }
 
-export async function hasPermissions(token: string) {
-	if (isJwt(token)) {
-		return handleJwt(token);
-	} else {
-		return handleApiKey(token);
-	}
+async function hasPermissions(token: string) {
+		if (isJwt(token)) {
+			return handleJwt(token);
+		} else {
+			return handleApiKey(token);
+		}
 }
 
-export async function handleApiKey(apiKey: string) {
+async function handleApiKey(apiKey: string) {
 	const basicAuth = Buffer.from(clientId + ':' + clientSecret, 'binary').toString('base64');
 	const headers = {
 		headers: {
@@ -88,7 +94,7 @@ export async function handleApiKey(apiKey: string) {
 	return true;
 }
 
-export async function handleJwt(token: string) {
+async function handleJwt(token: string) {
 	const permissionTokenJson: TokenIntrospectionResponse = await client.introspect(token);
 	if (!permissionTokenJson.active) {
 		console.log('Token inactive');
@@ -127,6 +133,8 @@ export async function handleJwt(token: string) {
 
 // UK
 // check introspect and check-apikey api error.
-// check absense of token
+// check absence of token
 // api result caching (alternative to memoize)
 // check where to add unauthenticated error
+// refactor code and make it better
+// check if .env scope for KC is a list
