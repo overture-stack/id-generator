@@ -4,7 +4,7 @@ import { closeDBConnection, getTableDefinition, prepareDataSource } from '../mid
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
 import {date, RecordType} from "zod";
-import {getRecord} from "../config-validator";
+import {getRecord} from "../config-validator.js";
 
 const mutex = new Mutex();
 

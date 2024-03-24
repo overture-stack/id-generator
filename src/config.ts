@@ -6,7 +6,7 @@ import {
 	getRequiredString,
 	getSchemaDef,
 	getUrl
-} from "./config-validator";
+} from "./config-validator.js";
 
 if (dotenv.config().error) {
 	console.log(`Error loading environment variables, aborting.`);

@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { NextFunction } from 'express';
 import * as config from '../config.js';
-import {getSchemaDef} from "../config-validator";
+import {getSchemaDef} from "../config-validator.js";
 
 export interface SchemaInfo {
 	tablename: string;
