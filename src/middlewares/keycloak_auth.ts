@@ -138,3 +138,5 @@ async function handleJwt(token: string) {
 // check where to add unauthenticated error
 // refactor code and make it better
 // check if .env scope for KC is a list
+// add keycloack scopes validation
+// check if ego and keycloak scopes can be combined -- yes they can. Only one is going to be used at a time anyway

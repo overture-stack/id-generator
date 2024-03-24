@@ -72,7 +72,7 @@ export async function findIdFor(request: Request, response: Response, next: Next
 function validateEntityType(entityType: string, next: NextFunction) {
 	if (!Object.values(config.entityList).includes(entityType)) {
 		response.status(400);
-		next(new InvalidEntityError('Invalid entity type: ' + entityType));
+		throw new InvalidEntityError('Invalid entity type: ' + entityType);
 	}
 }
 
@@ -83,7 +83,7 @@ function validateSearchParams(searchCriteria: RecordType<string, string>, next: 
 		const searchString = searchCriteria[keys[i]];
 		if (format.test(searchString) || searchString.length < 1) {
 			response.status(400);
-			next(new InvalidRequestError("Invalid value '" + searchString + "' for " + keys[i]));
+			throw new InvalidRequestError("Invalid value '" + searchString + "' for " + keys[i])
 		}
 	}
 }
