@@ -1,4 +1,5 @@
-import { findIdForEntity, getIdForEntity, root } from './routes/root.js';
+//import { findIdForEntity, getIdForEntity, root } from './routes/root.js';
+import router from './routes/root.js';
 import { defaultErrorHandler } from './middlewares/error-handler.js';
 import { initializeDB, initializeDBSequences } from './middlewares/datasource.js';
 import * as config from './config.js';
@@ -6,19 +7,19 @@ import cors from 'cors';
 import express from 'express';
 import yaml from 'yamljs';
 import * as swaggerUi from 'swagger-ui-express';
-import { egoAuthHandler } from './middlewares/ego_auth.js';
-import { keycloakAuthHandler } from './middlewares/keycloak_auth.js';
+//import { egoAuthHandler } from './middlewares/autorization/ego-auth-handler';
+//import { authHandler } from './middlewares/autorization/keycloak-auth-handler';
 
 const app = express();
 
 function setupExpress() {
 	app.use(cors({ origin: true }));
-	app.route('/').get(root);
+	app.route('/').get(router.root);
 	//app.use(egoAuthHandler);
-	app.use(keycloakAuthHandler);
+	//app.use(authHandler);
 	//app.route('/authUtil').get(authUtil);
-	app.route(config.requestRoute).get(getIdForEntity);
-	app.route(config.requestRoute + '/find').get(findIdForEntity);
+	app.route(config.requestRoute).get(router.getIdForEntity);
+	app.route(config.requestRoute + '/find').get(router.findIdForEntity);
 	app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(yaml.load('src/resources/swagger.yaml')));
 	app.use(defaultErrorHandler);
 }

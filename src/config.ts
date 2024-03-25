@@ -22,13 +22,15 @@ export const dbSchema = getRequiredString('DB_SCHEMA');
 export const dbName = getRequiredString('DB_NAME');
 export const requestRoute = getRequiredString('REQUEST_ROUTE');
 
-export const authScheme = getRequiredString('AUTH_SCHEME');
+export const authStrategy = getRequiredString('AUTH_STRATEGY');
 export const clientId = getRequiredString('CLIENT_ID');
 export const clientSecret = getRequiredString('CLIENT_SECRET');
 
-export const egoUrl = getUrl('EGO_URL');
-export const keycloakUrl = getUrl('KEYCLOAK_URL');
-export const keycloakResource = getString('KEYCLOAK_RESOURCE');
+// export const egoUrl = getUrl('EGO_URL');
+// export const keycloakUrl = getUrl('KEYCLOAK_URL');
+export const authServerUrl = getUrl('AUTH_SERVER_URL');
+
+export const keycloakResource = getString('KEYCLOAK_RESOURCE'); // UK THIS WILL CHANGE
 
 export const dbPort = getRequiredNumber('DB_PORT');
 export const port = getRequiredNumber('PORT');
@@ -37,7 +39,7 @@ export const dbSync: boolean = JSON.parse(process.env.DB_SYNCHRONIZE || 'false')
 export const logging: boolean = JSON.parse(process.env.DB_LOGGING || 'false');
 
 export const entityList = getRequiredArray('ENTITY_LIST');
-export const scopes = getRequiredArray('EGO_SCOPES');
+export const scopes = getRequiredArray('EGO_SCOPES'); // UK THIS WILL CHANGE
 
 export const dbSequences = getArray('DB_SEQUENCES');
 

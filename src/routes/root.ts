@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { findIdFor, getId } from '../services/id-service.js';
 import { closeDBConnection } from '../middlewares/datasource.js';
+import {authorize} from "../middlewares/autorization/auth-util.js";
 /*import {code_verifier, newClient} from "../server.js";
 
 
@@ -15,32 +16,40 @@ export async function authUtil(request: Request, response: Response) {
 	//response.status(200).send("it's ok");
 }*/
 
-export function root(request: Request, response: Response) {
-	const healthcheck = {
-		message: 'Service Up',
-		timestamp: Date.now(),
-	};
-	response.send(healthcheck);
+
+class ServiceRouter {
+
+	root(request: Request, response: Response) {
+		const healthcheck = {
+			message: 'Service Up',
+			timestamp: Date.now(),
+		};
+		response.send(healthcheck);
+	}
+
+	getIdForEntity(request: Request, response: Response, next: NextFunction) {
+		const requestId = Date.now();
+		console.log(requestId);
+		return getId(request, response, next, requestId)
+			.then((id) => response.status(200).json(id))
+			.catch((err) => {
+				closeDBConnection(next, requestId).then(() => console.log('DB conn closed'));
+				next(err);
+			});
+	}
+
+	@authorize('FIND')
+	findIdForEntity(request: Request, response: Response, next: NextFunction) {
+		const requestId = Date.now();
+		console.log(requestId);
+		return findIdFor(request, response, next, requestId)
+			.then((id) => response.status(200).json(id))
+			.catch((err) => {
+				closeDBConnection(next, requestId).then(() => console.log('DB conn closed'));
+				next(err);
+			});
+	}
 }
 
-export function getIdForEntity(request: Request, response: Response, next: NextFunction) {
-	const requestId = Date.now();
-	console.log(requestId);
-	return getId(request, response, next, requestId)
-		.then((id) => response.status(200).json(id))
-		.catch((err) => {
-			closeDBConnection(next, requestId).then(() => console.log('DB conn closed'));
-			next(err);
-		});
-}
+export default new ServiceRouter();
 
-export function findIdForEntity(request: Request, response: Response, next: NextFunction) {
-	const requestId = Date.now();
-	console.log(requestId);
-	return findIdFor(request, response, next, requestId)
-		.then((id) => response.status(200).json(id))
-		.catch((err) => {
-			closeDBConnection(next, requestId).then(() => console.log('DB conn closed'));
-			next(err);
-		});
-}
