@@ -62,6 +62,18 @@ export const getArray = (name: string): ZodString['_output'][] => {
 	return stringArray.data;
 };
 
+
+export const getEnum = (name: string, enumList: string[]): string => {
+	const zEnum = z.enum(["", ...enumList]);
+	const value = process.env[name] || '';
+	const stringValue = zEnum.safeParse(value);
+	if (!stringValue.success) {
+		throw new Error('property ' + name + ' in config is not a valid. Value should be one of '+ enumList.toString());
+	}
+	return stringValue.data;
+
+}
+
 export const getRecord = (name: string): ZodRecord<ZodString, ZodString> => {
 	const config_entry = name.toUpperCase() + `_SCHEMA`;
 	return z.record(

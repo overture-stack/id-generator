@@ -27,6 +27,7 @@ class ServiceRouter {
 		response.send(healthcheck);
 	}
 
+	@authorize('CREATE')
 	getIdForEntity(request: Request, response: Response, next: NextFunction) {
 		const requestId = Date.now();
 		console.log(requestId);

@@ -35,20 +35,23 @@ interface TokenIntrospectionResponse {
 
 class KeycloakAuthStrategy implements AuthorizationStrategy {
 
-
 	async authHandler(req: Request, res: Response, next: NextFunction) {
 		console.log('keycloak auth handler');
 		const token = extractHeaderToken(req);
 		try {
 			if (!(await this.hasPermissions(token))) {
 				res.statusCode = 403;
-				//next(new ForbiddenError('Forbidden. Permission Denied'));
-				throw next(new ForbiddenError('Forbidden. Permission Denied'));
+				throw new ForbiddenError('Forbidden. Permission Denied');
 			}
 		} catch (e) {
-			console.log(e);
-			res.statusCode = 401;
-			throw new UnauthorizedError('You need to be authenticated for this request.')
+			if (e instanceof ForbiddenError) {
+				res.statusCode = 403;
+				throw e;
+			} else {
+				console.log(e);
+				res.statusCode = 401;
+				throw new UnauthorizedError('You need to be authenticated for this request.')
+			}
 		}
 	}
 
@@ -78,7 +81,7 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 			console.log('token invalid or revoked');
 			return false;
 		}
-		if (!response.data.scope.includes(config.keycloakResource)) {
+		if (!response.data.scope.includes(config.scopes)) {
 			console.log('scopes absent');
 			return false;
 		}
@@ -99,13 +102,12 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 			return false;
 		}
 		const tokenPermissions: Permissions[] = permissionTokenJson.authorization['permissions'];
-		if (
-			!(
-				tokenPermissions.filter((p: Permissions) => {
-					return p.rsname.includes(config.keycloakResource.split('.')[0]) && p.scopes?.includes(config.keycloakResource.split('.')[1]);
-				}).length > 0
-			)
-		) {
+		const scopesChecker = config.scopes.every(sc => {
+			return tokenPermissions.filter((p: Permissions) => {
+				return p.rsname.includes(sc.split('.')[0]) && p.scopes?.includes(sc.split('.')[1]);
+			}).length > 0;
+		})
+		if (!scopesChecker){
 			console.log('permissions absent');
 			return false;
 		}
@@ -113,10 +115,8 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 		return true;
 	}
 
-
 	async getClient(){
 		const issuer = await Issuer.discover(config.authServerUrl + '/.well-known/openid-configuration');
-
 		const client = new issuer.Client({
 			client_id: config.clientId,
 			client_secret: config.clientSecret,
@@ -132,6 +132,6 @@ export default new KeycloakAuthStrategy();
 // check introspect and check-apikey api error.
 // api result caching (alternative to memoize)
 // refactor code and make it better
-// check if .env scope for KC is a list
-// add keycloack scopes validation
-// check if ego and keycloak scopes can be combined -- yes they can. Only one is going to be used at a time anyway
+// check if .env scope for KC is a list √
+// add keycloack scopes validation -- not needed
+// check if ego and keycloak scopes can be combined -- yes they can. Only one is going to be used at a time anyway √

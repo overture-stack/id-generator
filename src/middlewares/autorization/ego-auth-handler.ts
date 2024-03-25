@@ -57,8 +57,6 @@ class EgoAuthStrategy implements AuthorizationStrategy {
 				}
 			});
 		}
-
-		// next();
 	 }
 }
 

@@ -5,9 +5,6 @@ import {authStrategy} from "../../config.js";
 import egoAuthStrategy from "./ego-auth-handler.js";
 import keycloakAuthStrategy from "./keycloak-auth-handler.js";
 
-/// ego-KC switch
-export async function egoAuthHandler() {}
-
 
 export interface AuthorizationStrategy{
 		authHandler(req: Request, res: Response, next: NextFunction): Promise<void>
@@ -31,7 +28,7 @@ export function authorize(action: string): MethodDecorator {
 			const response = arguments[1] as Response;
 			const next = arguments[2] as NextFunction;
 			try {
-				await getAuthStrategy().authHandler(request, response, next);
+				await getAuthStrategy()?.authHandler(request, response, next); //UK check the question
 				origFunction.apply(this, args);
 			} catch (err) {
 				next(err);
