@@ -4,6 +4,7 @@ import {config} from "dotenv";
 import {authStrategy} from "../../config.js";
 import egoAuthStrategy from "./ego-auth-handler.js";
 import keycloakAuthStrategy from "./keycloak-auth-handler.js";
+import {UnauthorizedError} from "../error-handler";
 
 
 export interface AuthorizationStrategy{
@@ -48,6 +49,9 @@ export function extractHeaderToken(req: Request) {
 
 
 export function isJwt(tokenString: string) {
+	if (!tokenString){
+		console.log("Token missing");
+	}
 	const jwtSplitted = tokenString.split('.');
 	if (jwtSplitted.length != 3) {
 		return false;
