@@ -13,7 +13,7 @@ import { AuthorizationStrategy, extractHeaderToken, isJwt } from './auth-util.js
     scope: string[]
 }*/
 
-class EgoAuthStrategy implements AuthorizationStrategy {
+class EgoAuth implements AuthorizationStrategy {
 	getKey = memoize(
 		async (egoURL: string) => {
 			const response = await axios.get(egoURL);
@@ -101,6 +101,6 @@ class EgoAuthStrategy implements AuthorizationStrategy {
 	}
 }
 
-export default new EgoAuthStrategy();
+export default new EgoAuth();
 
 // UK: check memoize and axios

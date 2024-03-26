@@ -1,9 +1,8 @@
-import { NextFunction, Request, response, Response } from 'express';
-import { config } from 'dotenv';
+import { NextFunction, Request, Response } from 'express';
 import { authStrategy } from '../../config.js';
-import egoAuthStrategy from './ego-auth-handler.js';
-import keycloakAuthStrategy from './keycloak-auth-handler.js';
-import { UnauthorizedError } from '../error-handler';
+import egoAuth from './ego-auth-handler.js';
+import keycloakAuth from './keycloak-auth-handler.js';
+import {ForbiddenError, UnauthorizedError} from "../error-handler";
 
 export interface AuthorizationStrategy {
 	authHandler(req: Request, res: Response, next: NextFunction): Promise<void>;
@@ -11,9 +10,9 @@ export interface AuthorizationStrategy {
 
 function getAuthStrategy() {
 	if (authStrategy === 'EGO') {
-		return egoAuthStrategy;
+		return egoAuth;
 	} else if (authStrategy === 'KEYCLOAK') {
-		return keycloakAuthStrategy;
+		return keycloakAuth;
 	}
 }
 
@@ -27,7 +26,7 @@ export function authorize(action: string): MethodDecorator {
 			const response = arguments[1] as Response;
 			const next = arguments[2] as NextFunction;
 			try {
-				await getAuthStrategy()?.authHandler(request, response, next); // UK check the question
+				await getAuthStrategy()?.authHandler(request, response, next);
 				origFunction.apply(this, args);
 			} catch (err) {
 				next(err);

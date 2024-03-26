@@ -33,7 +33,7 @@ interface TokenIntrospectionResponse {
 	[key: string]: any;
 }
 
-class KeycloakAuthStrategy implements AuthorizationStrategy {
+class KeycloakAuth implements AuthorizationStrategy {
 	async authHandler(req: Request, res: Response, next: NextFunction) {
 		console.log('keycloak auth handler');
 		const token = extractHeaderToken(req);
@@ -109,7 +109,7 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 			);
 		});
 		if (!scopesChecker) {
-			console.log('permissions absent');
+			console.log('invalid scopes');
 			return false;
 		}
 		console.log('permissions present');
@@ -127,14 +127,10 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 	}
 }
 
-export default new KeycloakAuthStrategy();
+export default new KeycloakAuth();
 
 // UK
-// check introspect and check-apikey api error.
 // api result caching (alternative to memoize)
 // refactor code and make it better
-// add keycloack scopes validation -- not needed
-// refactor the auth strategy interface to include authHandler method
-// retest all scenarios for from db creation to auth along with error scenarios
 // check for unauth error in KC for invalid or inactive tokens
-// check the special char regex
+
