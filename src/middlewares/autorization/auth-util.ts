@@ -29,7 +29,7 @@ export function authorize(action: string): MethodDecorator {
 			const response = arguments[1] as Response;
 			const next = arguments[2] as NextFunction;
 			try {
-				await getAuthStrategy()?.authHandler(request, response, next); //UK check the question
+				await getAuthStrategy()?.authHandler(request, response, next); // UK check the question
 				origFunction.apply(this, args);
 			} catch (err) {
 				next(err);
@@ -41,7 +41,6 @@ export function authorize(action: string): MethodDecorator {
 export function extractHeaderToken(req: Request) {
 	const {authorization: authorizationHeader} = req.headers;
 	const {authorization: authorizationBody} = req.body || {};
-
 	const authorization = authorizationHeader || authorizationBody;
 	const token: string = authorization ? authorization.split(' ')[1] : req.query.key;
 	return token;

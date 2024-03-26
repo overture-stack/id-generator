@@ -1,126 +1,107 @@
-import { NextFunction, Request, Response } from 'express';
-import { ForbiddenError, UnauthorizedError } from '../error-handler.js';
+import {NextFunction, Request, Response} from 'express';
+import {ForbiddenError, UnauthorizedError} from '../error-handler.js';
 import jwt from 'jsonwebtoken';
 import memoize from 'memoizee';
 import axios from 'axios';
 import ms from 'ms';
 import * as config from '../../config.js';
-import {AuthorizationStrategy, extractHeaderToken} from "./auth-util.js";
+import {AuthorizationStrategy, extractHeaderToken, isJwt} from "./auth-util.js";
+
+/*interface ApiKeyJson {
+    user_id: string;
+    exp: string;
+    scope: string[]
+}*/
 
 class EgoAuthStrategy implements AuthorizationStrategy {
 
-	 getKey = memoize(
-		async (egoURL: string) => {
-			const response = await axios.get(egoURL);
-			return response.data;
-		},
-		{
-			maxAge: ms('1h'),
-			preFetch: true,
-		},
-	);
+    getKey = memoize(
+        async (egoURL: string) => {
+            const response = await axios.get(egoURL);
+            return response.data;
+        },
+        {
+            maxAge: ms('1h'),
+            preFetch: true,
+        },
+    );
 
-	 verifyEgoToken = async (token: string, egoURL: string) => {
-		const key = await this.getKey(config.authServerUrl);
-		return jwt.verify(token, key);
-	};
+    scopeChecker = (tokenScopes: string []) => {
+        return config.scopes.every(sc => {
+            return tokenScopes.includes(sc);
+        });
+    }
 
-	 async  authHandler(req: Request, res: Response, next: NextFunction) {
-		//UK: check api-key or jwt
+    verifyApiKey = async (token: string) => {
+        const basicAuth = Buffer.from(config.clientId + ':' + config.clientSecret, 'binary').toString('base64');
+        const headers = {
+            headers: {
+                Authorization: 'Basic ' + basicAuth,
+            },
+        };
+        const response = await axios.post(config.authServerUrl + '/o/check_api_key?apiKey=' + token, null, headers);
+        return response.data;
+    }
 
-		console.log('ego auth handler');
+    verifyEgoToken = async (token: string) => {
+        const key = await this.getKey(config.authServerUrl + '/oauth/token/public_key');
+        return jwt.verify(token, key);
+    };
 
-		 const bearerToken = extractHeaderToken(req);
+    async authHandler(req: Request, res: Response, next: NextFunction) {
+        console.log('ego auth handler');
+        const bearerToken = extractHeaderToken(req);
+        try {
+            if (!(await this.hasPermissions(bearerToken))) {
+                res.statusCode = 403;
+                throw new ForbiddenError('Forbidden. Permission Denied');
+            }
+        } catch (e) {
+            if (e instanceof ForbiddenError) {
+                res.statusCode = 403;
+                throw e;
+            } else {
+                console.log(e);
+                res.statusCode = 401;
+                throw new UnauthorizedError('You need to be authenticated for this request.')
+            }
+        }
+    }
 
+    async hasPermissions(token: string) {
+        if (isJwt(token)) {
+            return this.handleJwt(token);
+        } else {
+            return this.handleApiKey(token);
+        }
+    }
+
+	async handleJwt(bearerToken: string) {
 		let valid = false;
-		try {
-			valid = !!(bearerToken && (await this.verifyEgoToken(bearerToken, 'egoURL')));
-		} catch (e) {
-			console.error(e);
-			valid = false;
-		}
+		valid = !!(bearerToken && (await this.verifyEgoToken(bearerToken)));
+        if (!valid) {
+            throw new Error;
+        } else {
+            const authToken = jwt.decode(bearerToken) as { [key: string]: any };
+            const tokenScopes = authToken['context']['scope'];
+            if (!this.scopeChecker(tokenScopes)) {
+                console.log('Invalid scopes');
+                return false;
+            }
+            return true;
+        }
+	}
 
-		if (!valid) {
-			res.statusCode = 401;
-			//next(new UnauthorizedError('You need to be authenticated for this request.'));
-			throw new UnauthorizedError('You need to be authenticated for this request.');
-		} else {
-			const authToken = jwt.decode(bearerToken) as { [key: string]: any };
-			//console.log('auth Token: ' + authToken.toString());
-			const tokenScopes = authToken['context']['scope'];
-
-			config.scopes.forEach((scope) => {
-				if (!tokenScopes.includes(scope)) {
-					res.statusCode = 403;
-					//next(new ForbiddenError('Forbidden. Permission Denied'));
-					throw new ForbiddenError('Forbidden. Permission Denied');
-				}
-			});
-		}
-	 }
+    async handleApiKey(token: string) {
+        const tokenJson = await this.verifyApiKey(token);
+        if (!this.scopeChecker(tokenJson['scope'])) {
+            console.log('Invalid scopes');
+            return false;
+        }
+        return true;
+    }
 }
 
 export default new EgoAuthStrategy();
 
-
-
-
-
-/*const getKey = memoize(
-	async (egoURL: string) => {
-		const response = await axios.get(egoURL);
-		return response.data;
-	},
-	{
-		maxAge: ms('1h'),
-		preFetch: true,
-	},
-);
-
-const verifyEgoToken = async (token: string, egoURL: string) => {
-	const key = await getKey(egoUrl);
-	//const key = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtPZ5ZeRS2744CMCHohZBbwEAgF0qu4BjAchNxWfSuyCCsa4LeyjkF/JOKqiOP522ULFlzEirfmntGYluxKNDr40JIMPBx6qnASZvT83mY9kbMkqeTuZ2nrRf9Z2o4aTBEyjWbKY2plWGML9WGUzOBUqMXxDc4/8FGFXzOZdmn2RItfD+hQM6F8RHWTE6P9+h4S/oPhqZ+4Ih3Jrk6BPG0Fv1u+9Dd7f7lptDaXALCEkuMqfwEwcpSUppkmErgGJ5Ujg3rtcbdFwgcr+cVaUkmZmSXn60JG0usiAO/d19DHa8CzETGlU4vaEvDm43h9ZpAOMIkoz8gos9IqYuBsYylQIDAQAB'
-	return jwt.verify(token, key);
-};
-
-export async function egoAuthHandler(req: Request, res: Response, next: NextFunction) {
-	//UK: check api-key or jwt
-
-	console.log('ego auth handler');
-	const { authorization: authorizationHeader } = req.headers;
-	const { authorization: authorizationBody } = req.body || {};
-
-	const authorization = authorizationHeader || authorizationBody;
-	const bearerToken: string = authorization ? authorization.split(' ')[1] : req.query.key;
-
-	let valid = false;
-	try {
-		valid = !!(bearerToken && (await verifyEgoToken(bearerToken, 'egoURL')));
-	} catch (e) {
-		console.error(e);
-		valid = false;
-	}
-
-	if (!valid) {
-		res.statusCode = 401;
-		next(new UnauthorizedError('You need to be authenticated for this request.'));
-	} else {
-		const authToken = jwt.decode(bearerToken) as { [key: string]: any };
-		//console.log('auth Token: ' + authToken.toString());
-		const scopes = authToken['context']['scope'];
-
-		config.scopes.forEach((scope) => {
-			if (!scopes.includes(scope)) {
-				res.statusCode = 403;
-				next(new ForbiddenError('Forbidden. Permission Denied'));
-			}
-		});
-	}
-
-	next();
-}*/
-
-
-
-
-//UK: check memoize and axios
+// UK: check memoize and axios

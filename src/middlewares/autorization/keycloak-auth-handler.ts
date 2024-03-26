@@ -81,7 +81,12 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 			console.log('token invalid or revoked');
 			return false;
 		}
-		if (!response.data.scope.includes(config.scopes)) {
+
+		const scopesChecker = config.scopes.every(sc => {
+			console.log("sc: "+sc);
+			return response.data.scope.includes(sc);
+		});
+		if(!scopesChecker){
 			console.log('scopes absent');
 			return false;
 		}
@@ -115,6 +120,7 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 		return true;
 	}
 
+
 	async getClient(){
 		const issuer = await Issuer.discover(config.authServerUrl + '/.well-known/openid-configuration');
 		const client = new issuer.Client({
@@ -132,6 +138,8 @@ export default new KeycloakAuthStrategy();
 // check introspect and check-apikey api error.
 // api result caching (alternative to memoize)
 // refactor code and make it better
-// check if .env scope for KC is a list √
 // add keycloack scopes validation -- not needed
-// check if ego and keycloak scopes can be combined -- yes they can. Only one is going to be used at a time anyway √
+// refactor the auth strategy interface to include authHandler method
+// retest all scenarios for from db creation to auth along with error scenarios
+// check for unauth error in KC for invalid or inactive tokens
+// check the special char regex
