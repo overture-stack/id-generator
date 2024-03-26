@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { Issuer } from 'openid-client';
 import * as config from '../../config.js';
-import {ForbiddenError, UnauthorizedError} from '../error-handler.js';
-import {AuthorizationStrategy, extractHeaderToken, isJwt} from './auth-util.js';
+import { ForbiddenError, UnauthorizedError } from '../error-handler.js';
+import { AuthorizationStrategy, extractHeaderToken, isJwt } from './auth-util.js';
 import axios from 'axios';
 
 interface Permissions {
@@ -34,7 +34,6 @@ interface TokenIntrospectionResponse {
 }
 
 class KeycloakAuthStrategy implements AuthorizationStrategy {
-
 	async authHandler(req: Request, res: Response, next: NextFunction) {
 		console.log('keycloak auth handler');
 		const token = extractHeaderToken(req);
@@ -50,11 +49,10 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 			} else {
 				console.log(e);
 				res.statusCode = 401;
-				throw new UnauthorizedError('You need to be authenticated for this request.')
+				throw new UnauthorizedError('You need to be authenticated for this request.');
 			}
 		}
 	}
-
 
 	async hasPermissions(token: string) {
 		if (isJwt(token)) {
@@ -63,7 +61,6 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 			return this.handleApiKey(token);
 		}
 	}
-
 
 	async handleApiKey(apiKey: string) {
 		const basicAuth = Buffer.from(config.clientId + ':' + config.clientSecret, 'binary').toString('base64');
@@ -76,24 +73,21 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 		const data = new FormData();
 		data.append('apiKey', apiKey);
 		const response = await axios.post(config.authServerUrl + '/apikey/check_api_key/', data, headers);
-
 		if (response.data.revoked && !response.data.valid) {
 			console.log('token invalid or revoked');
 			return false;
 		}
-
-		const scopesChecker = config.scopes.every(sc => {
-			console.log("sc: "+sc);
+		const scopesChecker = config.scopes.every((sc) => {
+			console.log('sc: ' + sc);
 			return response.data.scope.includes(sc);
 		});
-		if(!scopesChecker){
+		if (!scopesChecker) {
 			console.log('scopes absent');
 			return false;
 		}
 		console.log('response: ' + response.data.scope[0]);
 		return true;
 	}
-
 
 	async handleJwt(token: string) {
 		const client = await this.getClient();
@@ -107,12 +101,14 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 			return false;
 		}
 		const tokenPermissions: Permissions[] = permissionTokenJson.authorization['permissions'];
-		const scopesChecker = config.scopes.every(sc => {
-			return tokenPermissions.filter((p: Permissions) => {
-				return p.rsname.includes(sc.split('.')[0]) && p.scopes?.includes(sc.split('.')[1]);
-			}).length > 0;
-		})
-		if (!scopesChecker){
+		const scopesChecker = config.scopes.every((sc) => {
+			return (
+				tokenPermissions.filter((p: Permissions) => {
+					return p.rsname.includes(sc.split('.')[0]) && p.scopes?.includes(sc.split('.')[1]);
+				}).length > 0
+			);
+		});
+		if (!scopesChecker) {
 			console.log('permissions absent');
 			return false;
 		}
@@ -120,8 +116,7 @@ class KeycloakAuthStrategy implements AuthorizationStrategy {
 		return true;
 	}
 
-
-	async getClient(){
+	async getClient() {
 		const issuer = await Issuer.discover(config.authServerUrl + '/.well-known/openid-configuration');
 		const client = new issuer.Client({
 			client_id: config.clientId,

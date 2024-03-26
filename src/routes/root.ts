@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { findIdFor, getId } from '../services/id-service.js';
 import { closeDBConnection } from '../middlewares/datasource.js';
-import {authorize} from "../middlewares/autorization/auth-util.js";
+import { authorize } from '../middlewares/autorization/auth-util.js';
 /*import {code_verifier, newClient} from "../server.js";
 
 
@@ -16,9 +16,7 @@ export async function authUtil(request: Request, response: Response) {
 	//response.status(200).send("it's ok");
 }*/
 
-
 class ServiceRouter {
-
 	root(request: Request, response: Response) {
 		const healthcheck = {
 			message: 'Service Up',
@@ -53,4 +51,3 @@ class ServiceRouter {
 }
 
 export default new ServiceRouter();
-

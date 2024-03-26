@@ -83,7 +83,7 @@ function validateSearchParams(searchCriteria: RecordType<string, string>, next: 
 		const searchString = searchCriteria[keys[i]];
 		if (format.test(searchString) || searchString.length < 1) {
 			response.status(400);
-			throw new InvalidRequestError("Invalid value '" + searchString + "' for " + keys[i])
+			throw new InvalidRequestError("Invalid value '" + searchString + "' for " + keys[i]);
 		}
 	}
 }

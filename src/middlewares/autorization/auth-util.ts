@@ -1,17 +1,15 @@
+import { NextFunction, Request, response, Response } from 'express';
+import { config } from 'dotenv';
+import { authStrategy } from '../../config.js';
+import egoAuthStrategy from './ego-auth-handler.js';
+import keycloakAuthStrategy from './keycloak-auth-handler.js';
+import { UnauthorizedError } from '../error-handler';
 
-import {NextFunction, Request, response, Response} from 'express';
-import {config} from "dotenv";
-import {authStrategy} from "../../config.js";
-import egoAuthStrategy from "./ego-auth-handler.js";
-import keycloakAuthStrategy from "./keycloak-auth-handler.js";
-import {UnauthorizedError} from "../error-handler";
-
-
-export interface AuthorizationStrategy{
-		authHandler(req: Request, res: Response, next: NextFunction): Promise<void>
+export interface AuthorizationStrategy {
+	authHandler(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
 
-function getAuthStrategy(){
+function getAuthStrategy() {
 	if (authStrategy === 'EGO') {
 		return egoAuthStrategy;
 	} else if (authStrategy === 'KEYCLOAK') {
@@ -21,7 +19,7 @@ function getAuthStrategy(){
 
 /// ego-KC switch
 export function authorize(action: string): MethodDecorator {
-	console.log("authorize called");
+	console.log('authorize called');
 	return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
 		const origFunction = descriptor.value;
 		descriptor.value = async function (...args: any[]) {
@@ -34,22 +32,21 @@ export function authorize(action: string): MethodDecorator {
 			} catch (err) {
 				next(err);
 			}
-		}
-	}
+		};
+	};
 }
 
 export function extractHeaderToken(req: Request) {
-	const {authorization: authorizationHeader} = req.headers;
-	const {authorization: authorizationBody} = req.body || {};
+	const { authorization: authorizationHeader } = req.headers;
+	const { authorization: authorizationBody } = req.body || {};
 	const authorization = authorizationHeader || authorizationBody;
 	const token: string = authorization ? authorization.split(' ')[1] : req.query.key;
 	return token;
 }
 
-
 export function isJwt(tokenString: string) {
-	if (!tokenString){
-		console.log("Token missing");
+	if (!tokenString) {
+		console.log('Token missing');
 	}
 	const jwtSplitted = tokenString.split('.');
 	if (jwtSplitted.length != 3) {

@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 import {
-	getArray, getEnum,
+	getArray,
+	getEnum,
 	getRecord,
 	getRequiredArray,
 	getRequiredNumber,
@@ -36,7 +37,7 @@ export const entityList = getRequiredArray('ENTITY_LIST');
 export const scopes = getArray('SCOPES');
 export const dbSequences = getArray('DB_SEQUENCES');
 
-export const authStrategy = getEnum('AUTH_STRATEGY', ["EGO", "KEYCLOAK", "NONE"]);
+export const authStrategy = getEnum('AUTH_STRATEGY', ['EGO', 'KEYCLOAK', 'NONE']);
 
 entityList.forEach((entity) => {
 	getSchemaDef(entity).parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || '[]'));
