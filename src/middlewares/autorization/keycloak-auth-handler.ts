@@ -129,9 +129,3 @@ class KeycloakAuth implements AuthorizationStrategy {
 
 export default new KeycloakAuth();
 
-// UK
-// api result caching (alternative to memoize)
-// refactor code and make it better
-// check for unauth error in KC for invalid or inactive tokens
-// check entityId reference and remove.
-

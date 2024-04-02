@@ -7,12 +7,6 @@ import ms from 'ms';
 import * as config from '../../config.js';
 import { AuthorizationStrategy, extractHeaderToken, isJwt } from './auth-util.js';
 
-/*interface ApiKeyJson {
-    user_id: string;
-    exp: string;
-    scope: string[]
-}*/
-
 class EgoAuth implements AuthorizationStrategy {
 	getKey = memoize(
 		async (egoURL: string) => {
@@ -102,5 +96,3 @@ class EgoAuth implements AuthorizationStrategy {
 }
 
 export default new EgoAuth();
-
-// UK: check memoize and axios
