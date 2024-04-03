@@ -14,7 +14,7 @@ if (dotenv.config().error) {
 }
 
 
-export const dbHost = getRequiredString('DB_HOST');//getRequiredEnvString('DB_HOST');
+export const dbHost = getRequiredString('DB_HOST');
 export const dbUsername = getRequiredString('DB_USERNAME');
 export const dbPassword = getRequiredString('DB_PASSWORD');
 export const dbSchema = getRequiredString('DB_SCHEMA');
