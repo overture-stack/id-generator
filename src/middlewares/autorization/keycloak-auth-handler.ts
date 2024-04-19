@@ -128,4 +128,3 @@ class KeycloakAuth implements AuthorizationStrategy {
 }
 
 export default new KeycloakAuth();
-

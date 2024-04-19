@@ -77,7 +77,10 @@ function validateEntityType(entityType: string, next: NextFunction) {
 }
 
 function validateSearchParams(searchCriteria: RecordType<string, string>, next: NextFunction) {
-	var format = /[\^°<>#,*~!"@& ('"}.={+`)§$%?®©¶\s]+/;
+	//var format = /[\^°<>#,*~!"@& ('"}.={+`)§$%?®©¶\s]+/;
+	//var format = new RegExp(config.requestRegex);
+	var format = /[\^°<>#,*~!"@&('"}={+`)§$%?®©¶\s]+/;
+	console.log('regular exp: ' + format.toString());
 	const keys = Object.keys(searchCriteria) as (keyof typeof searchCriteria)[];
 	for (let i = 0; i <= keys.length - 1; i++) {
 		const searchString = searchCriteria[keys[i]];

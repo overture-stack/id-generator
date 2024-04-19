@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { authStrategy } from '../../config.js';
 import egoAuth from './ego-auth-handler.js';
 import keycloakAuth from './keycloak-auth-handler.js';
-import {ForbiddenError, UnauthorizedError} from "../error-handler";
+import { ForbiddenError, UnauthorizedError } from '../error-handler';
 
 export interface AuthorizationStrategy {
 	authHandler(req: Request, res: Response, next: NextFunction): Promise<void>;

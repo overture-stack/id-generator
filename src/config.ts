@@ -7,6 +7,7 @@ import {
 	getRequiredNumber,
 	getRequiredString,
 	getSchemaDef,
+	getString,
 	getUrl,
 } from './config-validator.js';
 
@@ -14,6 +15,8 @@ if (dotenv.config().error) {
 	console.log(`Error loading environment variables, aborting.`);
 	process.exit(1);
 }
+
+export const requestRegex = getString('REQUEST_REGEX');
 
 export const dbHost = getRequiredString('DB_HOST');
 export const dbUsername = getRequiredString('DB_USERNAME');

@@ -117,13 +117,33 @@ export const getSchemaDef = (name: string): z.ZodType<SchemaInfo> => {
 					},
 				)
 				.nonempty({ message: 'column array in  ' + config_entry + ' should not be empty' }),
-			index: z
+			/*index: z
 				.array(
 					z.string({
 						invalid_type_error: 'index in  ' + config_entry + ' is invalid. It should be a list of column name strings',
 					}),
 					{
 						invalid_type_error: 'index in  ' + config_entry + ' is invalid. It should be a list of column name strings',
+						required_error: 'index in  ' + config_entry + ' is missing.',
+					},
+				)
+				.nonempty({ message: 'index in ' + config_entry + ' is required' }),*/
+			index: z
+				.array(
+					z.array(
+						z.string({
+							invalid_type_error:
+								'index in  ' + config_entry + ' is invalid. It should be a list of column name strings',
+						}),
+						{
+							invalid_type_error:
+								'index in  ' + config_entry + ' is invalid. It should be a list of column name strings',
+							required_error: 'index in  ' + config_entry + ' is missing.',
+						},
+					),
+					{
+						invalid_type_error:
+							'index in  ' + config_entry + ' is invalid. It should be a list of list of column name strings',
 						required_error: 'index in  ' + config_entry + ' is missing.',
 					},
 				)

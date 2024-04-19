@@ -16,7 +16,7 @@ import { getSchemaDef } from '../config-validator.js';
 export interface SchemaInfo {
 	tablename: string;
 	columns: { name: string; type: ColumnType; defaultValue?: string; unique?: boolean }[];
-	index: string[];
+	index: string[][];
 }
 
 export let connection = {} as Connection;
@@ -26,7 +26,7 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 	@Entity({
 		name: schema.tablename,
 	})
-	@Unique('composite_index_' + schema.tablename, schema.index)
+	@CompositeIndex(schema.index)
 	class DynamicEntity {
 		@PrimaryGeneratedColumn()
 		id: number;
@@ -57,8 +57,19 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 			entities: [DynamicEntity],
 		});
 	}
+
 	const repository = connection.getRepository(DynamicEntity);
 	return repository;
+}
+
+function CompositeIndex(columns: string[][]) {
+	return function (target: any) {
+		if (typeof target === 'function' && target.prototype) {
+			columns.forEach((colList) => Unique(colList)(target));
+		} else {
+			throw new Error('CompositeIndex decorator can only be applied to entity classes.');
+		}
+	};
 }
 
 export async function createSequences(sql: string) {
@@ -69,7 +80,6 @@ export async function createSequences(sql: string) {
 }
 
 export function getTableDefinition(entity: string) {
-	//const schema = config.schemaDef.parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''));
 	const schema = getSchemaDef(entity.toUpperCase() + `_SCHEMA`).parse(
 		JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''),
 	);
