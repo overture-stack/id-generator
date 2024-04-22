@@ -26,7 +26,7 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 	@Entity({
 		name: schema.tablename,
 	})
-	@CompositeIndex(schema.index)
+	@CompositeIndex(schema.index, schema.tablename)
 	class DynamicEntity {
 		@PrimaryGeneratedColumn()
 		id: number;
@@ -62,10 +62,10 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 	return repository;
 }
 
-function CompositeIndex(columns: string[][]) {
+function CompositeIndex(columns: string[][], name: string) {
 	return function (target: any) {
 		if (typeof target === 'function' && target.prototype) {
-			columns.forEach((colList) => Unique(colList)(target));
+			columns.forEach((colList) => Unique('UQ_'+name+'_composite', colList)(target));
 		} else {
 			throw new Error('CompositeIndex decorator can only be applied to entity classes.');
 		}
