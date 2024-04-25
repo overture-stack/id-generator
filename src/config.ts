@@ -16,7 +16,7 @@ if (dotenv.config().error) {
 	process.exit(1);
 }
 
-export const requestRegex = getString('REQUEST_REGEX');
+export const requestRegex = getString('REQUEST_VALIDATOR') || '[\\^°<>#,~*!@&(\'}={+`)§$%?®©¶\\s]+';
 
 export const dbHost = getRequiredString('DB_HOST');
 export const dbUsername = getRequiredString('DB_USERNAME');
@@ -38,6 +38,7 @@ export const logging: boolean = JSON.parse(process.env.DB_LOGGING || 'false');
 export const entityList = getRequiredArray('ENTITY_LIST');
 
 export const scopes = getArray('SCOPES');
+export const securedApi = getArray('SECURED_API');
 export const dbSequences = getArray('DB_SEQUENCES');
 
 export const authStrategy = getEnum('AUTH_STRATEGY', ['EGO', 'KEYCLOAK', 'NONE']);

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { authStrategy } from '../../config.js';
+import {authStrategy, securedApi} from '../../config.js';
 import egoAuth from './ego-auth-handler.js';
 import keycloakAuth from './keycloak-auth-handler.js';
 import { ForbiddenError, UnauthorizedError } from '../error-handler';
@@ -26,7 +26,7 @@ export function authorize(action: string): MethodDecorator {
 			const response = arguments[1] as Response;
 			const next = arguments[2] as NextFunction;
 			try {
-				await getAuthStrategy()?.authHandler(request, response, next);
+				if(securedApi.length == 0 || securedApi.includes(action)) await getAuthStrategy()?.authHandler(request, response, next);
 				origFunction.apply(this, args);
 			} catch (err) {
 				next(err);

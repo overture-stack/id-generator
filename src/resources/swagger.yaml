@@ -5,16 +5,23 @@ info:
 #security:
 #  - bearerAuth: ['PROGRAMDATA-${programId}.WRITE', 'CLINICALSERVICE.WRITE']
 paths:
-  /{programId}/{submitterId}/{someOtherColumn}/{entityType}:
+  /{programId}/{submitterDonorId}/{submitterSpecimenId}/{submitterSampleId}/{submitterPrimaryDiagnosisId}/{submitterFollowUpId}/{submitterTreatmentId}/{testInterval}/{familyRelativeId}/{comorbidityTypeCode}/{entityType}:
     get:
       tags:
         - Central Id
       summary: Get or create ARGO ID for any entity given program and submitter_sample_id
       parameters:
         - $ref: '#/components/parameters/PathProgramId'
-        - $ref: '#/components/parameters/PathSubmitterId'
+        - $ref: '#/components/parameters/PathSubmitterDonorId'
+        - $ref: '#/components/parameters/PathSubmitterSpecimenId'
+        - $ref: '#/components/parameters/PathSubmitterSampleId'
+        - $ref: '#/components/parameters/PathSubmitterPrimaryDiagnosisId'
+        - $ref: '#/components/parameters/PathSubmitterFollowUpId'
+        - $ref: '#/components/parameters/PathSubmitterTreatmentId'
+        - $ref: '#/components/parameters/PathTestInterval'
+        - $ref: '#/components/parameters/PathFamilyRelativeId'
+        - $ref: '#/components/parameters/PathComorbidityTypeCode'
         - $ref: '#/components/parameters/PathEntityType'
-        - $ref: '#/components/parameters/PathSomeCol'
       responses:
         '200':
           description: 'Create new or return an existing argo id.'
@@ -30,16 +37,23 @@ paths:
                 - $ref: '#/components/responses/IdGenerationError'
                 - $ref: '#/components/responses/IdGenerationError'
 
-  /{programId}/{submitterId}/{someOtherColumn}/{entityType}/find:
+  /{programId}/{submitterDonorId}/{submitterSpecimenId}/{submitterSampleId}/{submitterPrimaryDiagnosisId}/{submitterFollowUpId}/{submitterTreatmentId}/{testInterval}/{familyRelativeId}/{comorbidityTypeCode}/{entityType}/find:
     get:
       tags:
         - Central Id
       summary: Get an existing ARGO ID for any entity given program and submitter_sample_id
       parameters:
         - $ref: '#/components/parameters/PathProgramId'
-        - $ref: '#/components/parameters/PathSubmitterId'
+        - $ref: '#/components/parameters/PathSubmitterDonorId'
+        - $ref: '#/components/parameters/PathSubmitterSpecimenId'
+        - $ref: '#/components/parameters/PathSubmitterSampleId'
+        - $ref: '#/components/parameters/PathSubmitterPrimaryDiagnosisId'
+        - $ref: '#/components/parameters/PathSubmitterFollowUpId'
+        - $ref: '#/components/parameters/PathSubmitterTreatmentId'
+        - $ref: '#/components/parameters/PathTestInterval'
+        - $ref: '#/components/parameters/PathFamilyRelativeId'
+        - $ref: '#/components/parameters/PathComorbidityTypeCode'
         - $ref: '#/components/parameters/PathEntityType'
-        - $ref: '#/components/parameters/PathSomeCol'
       responses:
         '200':
           description: 'Return an existing argo id.'
