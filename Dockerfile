@@ -24,5 +24,5 @@ RUN mkdir dist && mkdir node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/entry-point.sh .
-EXPOSE 3221
+EXPOSE 9001
 CMD ["./entry-point.sh"]
