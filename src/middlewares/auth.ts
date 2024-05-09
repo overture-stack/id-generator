@@ -43,7 +43,7 @@ export async function egoAuthHandler(req: Request, res: Response, next: NextFunc
 
 	if (!valid) {
 		res.statusCode=401;
-		next(new UnauthorizedError('You need to be authenticated for this request.'));
+		next(new UnauthorizedError('You need to be authenticated for this request.', 401));
 	} else {
 		const authToken = jwt.decode(bearerToken) as { [key: string]: any };
 		//console.log('auth Token: ' + authToken.toString());
@@ -52,7 +52,7 @@ export async function egoAuthHandler(req: Request, res: Response, next: NextFunc
 		config.scopes.forEach((scope) => {
 			if (!scopes.includes(scope)) {
 				res.statusCode=403;
-				next(new ForbiddenError('Forbidden. Permission Denied'));
+				next(new ForbiddenError('Forbidden. Permission Denied', 403));
 			}
 		});
 	}

@@ -3,7 +3,7 @@ import {
 	ColumnType,
 	Connection,
 	createConnection,
-	CreateDateColumn,
+	CreateDateColumn, DataSource,
 	Entity,
 	getConnectionManager,
 	PrimaryGeneratedColumn,
@@ -12,12 +12,35 @@ import {
 import { NextFunction } from 'express';
 import * as config from '../config.js';
 import {getSchemaDef} from "../config-validator.js";
+import {schemaDefinitions} from "../config.js";
 
 export interface SchemaInfo {
 	tablename: string;
 	columns: { name: string; type: ColumnType; defaultValue?: string; unique?: boolean }[];
 	index: string[];
 }
+
+const schemaInfo : SchemaInfo = new class implements SchemaInfo {
+	columns: { name: string; type: ColumnType; defaultValue?: string; unique?: boolean }[];
+	index: string[];
+	tablename: string;
+};
+
+/*export type SchemaInfo = {
+	tablename: string;
+	columns: [{
+		type: "string" | "number" | "boolean" | "float" | "date" | "varchar" | "varchar2" | "timestamp" | "double";
+		name: string;
+		defaultValue?: string | undefined;
+		unique?: boolean | undefined;
+	}, ...{
+		type: "string" | "number" | "boolean" | "float" | "date" | "varchar" | "varchar2" | "timestamp" | "double";
+		name: string;
+		defaultValue?: string | undefined;
+		unique?: boolean | undefined;
+	}[]];
+	index: [string, ...string[]];
+}*/
 
 export let connection = {} as Connection;
 const connectionManager = getConnectionManager();
@@ -40,7 +63,7 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 		Column({ type, default: () => defaultValue, unique })(DynamicEntity.prototype, key);
 	});
 
-	const isConnected =
+	/*const isConnected =
 		connectionManager.has(requestId.toString()) && connectionManager.get(requestId.toString()).isConnected;
 	if (!isConnected) {
 		connection = await createConnection({
@@ -56,8 +79,25 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 			logging: config.logging,
 			entities: [DynamicEntity],
 		});
-	}
-	const repository = connection.getRepository(DynamicEntity);
+	}*/
+
+	//const repository = connection.getRepository(DynamicEntity);
+
+	const dataSourceConn = new DataSource({
+		type: 'postgres',
+		name: requestId.toString(),
+		host: config.dbHost,
+		username: config.dbUsername,
+		password: config.dbPassword,
+		port: config.dbPort,
+		database: config.dbName,
+		schema: config.dbSchema,
+		synchronize: dbSync,
+		logging: config.logging,
+		entities: [DynamicEntity],
+	});
+	await dataSourceConn.initialize();
+	const repository = dataSourceConn.getRepository(DynamicEntity);
 	return repository;
 }
 
@@ -70,7 +110,9 @@ export async function createSequences(sql: string) {
 
 export function getTableDefinition(entity: string) {
 	//const schema = config.schemaDef.parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''));
-	const schema = getSchemaDef(entity.toUpperCase() + `_SCHEMA`).parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''));
+	//const schema = getSchemaDef(entity.toUpperCase() + `_SCHEMA`).parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || '')); //UK: uncomment this
+	const schema = config.schemaDefinitions.get(entity) || schemaInfo;
+	//const schema = getSchemaDef(entity);
 	return schema;
 }
 
@@ -104,7 +146,7 @@ export async function initializeDB(){
 }
 
 export async function getDBConnection(name: string) {
-	const isConnected = connectionManager.has(name) && connectionManager.get(name).isConnected;
+	/*const isConnected = connectionManager.has(name) && connectionManager.get(name).isConnected;
 	if (!isConnected) {
 		return await createConnection({
 			type: 'postgres',
@@ -119,7 +161,21 @@ export async function getDBConnection(name: string) {
 		});
 	} else {
 		return connectionManager.get(name);
-	}
+	}*/
+
+	const dataSourceConn = new DataSource({
+		type: 'postgres',
+		host: config.dbHost,
+		username: config.dbUsername,
+		password: config.dbPassword,
+		port: config.dbPort,
+		database: config.dbName,
+		schema: config.dbSchema,
+		synchronize: config.dbSync,
+		logging: config.logging,
+	});
+	await dataSourceConn.initialize();
+	return dataSourceConn;
 }
 
 export async function closeDBConnection(next: NextFunction, requestId: number) {

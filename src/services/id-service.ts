@@ -9,17 +9,17 @@ import {getRecord} from "../config-validator.js";
 const mutex = new Mutex();
 
 // create new id
-async function createId(searchCriteria: {}, entityType: string, next: NextFunction, requestId: number) {
+async function createId(searchCriteria: {}, entityType: string, requestId: number) {
 	console.log('******** CREATE CALLED :' + requestId);
 	const repo = await prepareDataSource(getTableDefinition(entityType), requestId, config.dbSync);
 
 	const savedEntity = await repo.save(searchCriteria);
-	await closeDBConnection(next, requestId).then(() => console.log('DB connection closed'));
+	//await closeDBConnection(next, requestId).then(() => console.log('DB connection closed'));
 	return savedEntity;
 }
 
 // check if an argo id exists for the submitter and program
-async function findId(searchCriteria: {}, entityType: string, next: NextFunction, requestId: number) {
+async function findId(searchCriteria: {}, entityType: string, requestId: number) {
 	console.log('******** FIND CALLED :' + requestId);
 	const schemaInfo = getTableDefinition(entityType);
 	const repo = await prepareDataSource(schemaInfo, requestId, config.dbSync);
@@ -39,21 +39,21 @@ async function findId(searchCriteria: {}, entityType: string, next: NextFunction
 	}
 
 	const entity = await query.addSelect([schemaInfo.tablename + '.entityId']).getOne();
-	await closeDBConnection(next, requestId).then(() => console.log('DB connection closed'));
+	//await closeDBConnection(next, requestId).then(() => console.log('DB connection closed'));
 	return entity;
 }
 
-export async function getId(request: Request, response: Response, next: NextFunction, requestId: number) {
+export async function getId(searchTerms: Record<string, string>, requestId: number){
 	const release = await mutex.acquire();
 	try {
-		const entityType = request.params.entityType;
-		validateEntityType(entityType, next);
-		const keyCriteria = getSearchCriteria(entityType, request);
-		validateSearchParams(keyCriteria, next);
-		let id = await findId(keyCriteria, entityType, next, requestId);
+		const entityType = searchTerms.entityType;
+		validateEntityType(entityType);
+		const keyCriteria = getSearchCriteria(entityType, searchTerms);
+		validateSearchParams(keyCriteria);
+		let id = await findId(keyCriteria, entityType, requestId);
 
 		if (!id) {
-			id = await createId(keyCriteria, entityType, next, requestId);
+			id = await createId(keyCriteria, entityType, requestId);
 		}
 		return id;
 	} finally {
@@ -62,36 +62,34 @@ export async function getId(request: Request, response: Response, next: NextFunc
 
 }
 
-export async function findIdFor(request: Request, response: Response, next: NextFunction, requestId: number) {
-	const entityType = request.params.entityType;
-	validateEntityType(entityType, next);
-	const keyCriteria = getSearchCriteria(entityType, request);
-	validateSearchParams(keyCriteria, next);
-	return (await findId(keyCriteria, entityType, next, requestId)) || 'Id not found for this search criteria';
+export async function findIdFor(searchTerms: Record<string, string>, requestId: number) {
+	const entityType = searchTerms.entityType;
+	validateEntityType(entityType);
+	const keyCriteria = getSearchCriteria(entityType, searchTerms);
+	validateSearchParams(keyCriteria);
+	return (await findId(keyCriteria, entityType, requestId)) || 'Id not found for this search criteria';
 }
 
-function validateEntityType(entityType: string, next: NextFunction) {
+
+function validateEntityType(entityType: string) {
 	if (!Object.values(config.entityList).includes(entityType)) {
-		response.status(400);
-		next(new InvalidEntityError('Invalid entity type: '+entityType));
+		throw new InvalidEntityError('Invalid entity type: '+entityType, 400);
 	}
 }
 
-function validateSearchParams(searchCriteria: RecordType<string, string>, next: NextFunction){
+function validateSearchParams(searchCriteria: RecordType<string, string>){
 	var format = /[\^°<>#,*~!"§$%?®©¶\s]+/;
 	const keys = Object.keys(searchCriteria) as (keyof typeof searchCriteria)[];
 	for (let i = 0; i <= keys.length - 1; i++) {
 		const searchString = searchCriteria[keys[i]];
 		if(format.test(searchString) || searchString.length<1){
-			response.status(400);
-			next(new InvalidRequestError("Invalid value '"+searchString+"' for "+keys[i]))
+			throw new InvalidRequestError("Invalid value '"+searchString+"' for "+keys[i], 400)
 		}
 	}
 }
 
-function getSearchCriteria(entity: string, request: Request) {
-	const property = entity.toUpperCase() + `_SEARCH`;
-	const requestParams = { ...request.params };
+function getSearchCriteria(entity: string, requestParams: Record<string, string>) {
+	const property = `${entity.toUpperCase()}_SEARCH`;
 	const keyCriteria = getRecord(property).parse(JSON.parse(process.env[property] || '[]'));
 	for (const param in requestParams) {
 		if (keyCriteria.hasOwnProperty(param)) {

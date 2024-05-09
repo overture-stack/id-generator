@@ -1,80 +1,65 @@
-import {z, ZodArray, ZodRecord, ZodString} from "zod";
+import {z, ZodArray, ZodMap, ZodNumber, ZodRecord, ZodString} from "zod";
 import {SchemaInfo} from "./middlewares/datasource";
 
 
 function getRequiredEnvVar(name: string){
-    const property = process.env[name] as any;
+    const property = process.env[name];
     if(!property || property.trim().length==0){
-        throw new Error("config file is missing property "+name);
+        throw new Error(`Environment variable ${name} is missing.`);
     }
     return property;
 }
-
 
 export const getRequiredNumber = (name: string): number => {
     const value = parseInt(getRequiredEnvVar(name));
     const numberValue = z.number().finite().safeParse(value);
     if(!numberValue.success) {
-        throw new Error("property "+name+" in config is not a valid number")
+        throw new Error(`Environment variable ${name} is not a valid number.`)
     }
     return numberValue.data;
 }
-
 
 export const getRequiredString = (name: string): string => {
     const value = getRequiredEnvVar(name);
     const stringValue = z.string().safeParse(value)
     if(!stringValue.success) {
-        throw new Error("property "+name+" in config is not a valid string");
+        throw new Error(`Environment variable ${name} is not a valid string.`);
     }
     return stringValue.data;
 }
-
-
-export const getString = (name:string): string => {
-    const value = process.env[name] || '';
-    const stringValue = z.string().safeParse(value)
-    if(!stringValue.success) {
-        throw new Error("property "+name+" in config is not a valid string");
-    }
-    return stringValue.data;
-}
-
 
 export const getUrl = (name:string): string => {
     const value = process.env[name] || 'a://';
     const stringValue = z.string().url().safeParse(value)
     if(!stringValue.success) {
-        throw new Error("property "+name+" in config is not a valid string");
+        throw new Error(`Environment variable ${name} is not a valid url string.`);
     }
     return stringValue.data;
 }
 
-
 export const getRequiredArray = (name: string): ZodString["_output"][] => {
-    const value = JSON.parse(process.env[name] || '[]');
+    const value = getArray(name);
     if(value.length == 0){
-        throw new Error("config file is missing property "+name);
+        throw new Error(`Environment variable ${name} is missing.`);
     }
-    return getArray(name);
+    return value;
 }
-
 
 export const getArray = (name: string): ZodString["_output"][] => {
     const value = JSON.parse(process.env[name] || '[]');
     const stringArray = z.array(z.string()).safeParse(value);
     if(!stringArray.success) {
-        throw new Error("config property "+name+" is not valid. Please provide an array of strings");
+        throw new Error(`Environment variable ${name} is not valid. Please provide an array of strings.`);
     }
     return stringArray.data;
 }
 
 export const getRecord = (name:string): ZodRecord<ZodString, ZodString> => {
-    const config_entry = name.toUpperCase() + `_SCHEMA`
+    const config_entry = `${name.toUpperCase()}_SEARCH`
    return  z.record(
         z.string({ invalid_type_error: 'Invalid key in '+config_entry+'. Should be a string'}),
         z.string({ invalid_type_error: 'Invalid value in '+config_entry+'. Should be a string' }),
-        { invalid_type_error: 'Search criteria missing for entity <'+name+'> in the ENTITY_LIST' },
+        { invalid_type_error: `Environment variable ${config_entry} is invalid or missing`},
     );
 }
 
@@ -89,7 +74,7 @@ export const getSchemaDef = (name: string): z.ZodType<SchemaInfo> => {
             columns: z
                 .array(
                     z.object({
-                        name: z.string({ required_error: 'column name in '+config_entry+' is missing' }),
+                        name: z.string({ required_error: 'column `name` in '+config_entry+' is missing' }),
                         type: z.union([
                             z.literal('float'),
                             z.literal('varchar'),
@@ -100,7 +85,7 @@ export const getSchemaDef = (name: string): z.ZodType<SchemaInfo> => {
                             z.literal('timestamp'),
                             z.literal('double'),
                             z.literal('boolean'),
-                        ]),
+                        ], {invalid_type_error: 'column `type` in '+config_entry+' has an invalid value.', required_error: 'column `type` in '+config_entry+' is required.'}),
                         defaultValue: z.string({ invalid_type_error: 'value for defaultValue in '+config_entry+' is invalid' }).optional(),
                         unique: z.boolean({ invalid_type_error: 'value for unique in '+config_entry+' is invalid' }).optional(),
                     }),
@@ -119,3 +104,58 @@ export const getSchemaDef = (name: string): z.ZodType<SchemaInfo> => {
         { invalid_type_error: 'Schema definition missing for entity <'+name+'> in the ENTITY_LIST' },
     );
 }
+
+
+
+/*export const SchemaDefinition = z.object(
+        {
+            tablename: z
+                .string()
+                .trim()
+                .min(1, ),
+            columns: z
+                .array(
+                    z.object({
+                        name: z.string(),
+                        type: z.union([
+                            z.literal('float'),
+                            z.literal('varchar'),
+                            z.literal('number'),
+                            z.literal('date'),
+                            z.literal('varchar2'),
+                            z.literal('string'),
+                            z.literal('timestamp'),
+                            z.literal('double'),
+                            z.literal('boolean'),
+                        ]),
+                        defaultValue: z.string().optional(),
+                        unique: z.boolean().optional(),
+                    })
+                )
+                .nonempty(),
+            index: z
+                .array(z.string())
+                .nonempty(),
+        }
+    );
+
+type zodSchemadef = z.infer<typeof SchemaDefinition>;
+
+export const getSchemaDef = (name: string): zodSchemadef => {
+    const envVariableName = `${name.toUpperCase()}_SCHEMA`;
+    const envValue = process.env[envVariableName] || ''
+    try {
+        const configValue = JSON.parse(process.env[envVariableName] || '');
+        const parseResult = SchemaDefinition.safeParse(configValue);
+        if (!parseResult.success) {
+            const message = parseResult.error.flatten()
+            throw new Error(
+                `${JSON.stringify(message)}`
+            );
+        }
+        return parseResult.data;
+    } catch (e) {
+        throw new Error(`Environment value for "${envVariableName}" is invalid with the following errors: ${e.message}`);
+    }
+};*/
+
