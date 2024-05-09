@@ -1,4 +1,4 @@
-import { InvalidEntityError, InvalidSearchValuesError } from '../middlewares/error-handler.js';
+import { InvalidEntityError, InvalidSearchValueError } from '../middlewares/error-handler.js';
 import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
@@ -79,7 +79,7 @@ function validateSearchParams(searchCriteria: RecordType<string, string>) {
 	for (let i = 0; i <= keys.length - 1; i++) {
 		const searchString = searchCriteria[keys[i]];
 		if (format.test(searchString) || searchString.length < 1) {
-			throw new InvalidSearchValuesError("Invalid value '" + searchString + "' for " + keys[i], 400);
+			throw new InvalidSearchValueError("Invalid value '" + searchString + "' for " + keys[i], 400);
 		}
 	}
 }
