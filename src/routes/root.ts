@@ -13,7 +13,7 @@ export function root(request: Request, response: Response) {
 export function getIdForEntity(request: Request, response: Response, next: NextFunction) {
 	const requestId = Date.now();
 	console.log(requestId);
-	return getId({...request.params}, requestId)
+	return getId({ ...request.params }, requestId)
 		.then((id) => response.status(200).json(id))
 		.catch((err) => {
 			//closeDBConnection(next, requestId).then(() => console.log('DB conn closed'));
@@ -24,7 +24,7 @@ export function getIdForEntity(request: Request, response: Response, next: NextF
 export function findIdForEntity(request: Request, response: Response, next: NextFunction) {
 	const requestId = Date.now();
 	console.log(requestId);
-	return findIdFor({...request.params}, requestId)
+	return findIdFor({ ...request.params }, requestId)
 		.then((id) => response.status(200).json(id))
 		.catch((err) => {
 			//closeDBConnection(next, requestId).then(() => console.log('DB conn closed'));

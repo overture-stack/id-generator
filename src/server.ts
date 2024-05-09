@@ -1,20 +1,17 @@
-
 import { findIdForEntity, getIdForEntity, root } from './routes/root.js';
 import { defaultErrorHandler } from './middlewares/error-handler.js';
-import {initializeDB, initializeDBSequences} from './middlewares/datasource.js';
+import { initializeDB, initializeDBSequences } from './middlewares/datasource.js';
 import * as config from './config.js';
 import cors from 'cors';
 import express from 'express';
 import yaml from 'yamljs';
 import * as swaggerUi from 'swagger-ui-express';
-import { egoAuthHandler } from './middlewares/auth.js';
 
 const app = express();
 
 function setupExpress() {
 	app.use(cors({ origin: true }));
 	app.route('/').get(root);
-	//app.use(egoAuthHandler);
 	app.route(config.requestRoute).get(getIdForEntity);
 	app.route(config.requestRoute + '/find').get(findIdForEntity);
 	app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(yaml.load('src/resources/swagger.yaml')));

@@ -5,7 +5,7 @@ import memoize from 'memoizee';
 import axios from 'axios';
 import ms from 'ms';
 import * as config from '../config.js';
-import {egoUrl} from "../config.js";
+import { egoUrl } from '../config.js';
 
 const getKey = memoize(
 	async (egoURL: string) => {
@@ -42,7 +42,7 @@ export async function egoAuthHandler(req: Request, res: Response, next: NextFunc
 	}
 
 	if (!valid) {
-		res.statusCode=401;
+		res.statusCode = 401;
 		next(new UnauthorizedError('You need to be authenticated for this request.', 401));
 	} else {
 		const authToken = jwt.decode(bearerToken) as { [key: string]: any };
@@ -51,7 +51,7 @@ export async function egoAuthHandler(req: Request, res: Response, next: NextFunc
 
 		config.scopes.forEach((scope) => {
 			if (!scopes.includes(scope)) {
-				res.statusCode=403;
+				res.statusCode = 403;
 				next(new ForbiddenError('Forbidden. Permission Denied', 403));
 			}
 		});
@@ -59,5 +59,3 @@ export async function egoAuthHandler(req: Request, res: Response, next: NextFunc
 
 	next();
 }
-
-

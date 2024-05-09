@@ -1,10 +1,10 @@
-import {NextFunction, Request, response, Response} from 'express';
-import {InvalidEntityError, InvalidRequestError} from '../middlewares/error-handler.js';
+import { NextFunction, Request, response, Response } from 'express';
+import { InvalidEntityError, InvalidRequestError } from '../middlewares/error-handler.js';
 import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
-import {date, RecordType} from "zod";
-import {getRecord} from "../config-validator.js";
+import { date, RecordType } from 'zod';
+import { getRecord } from '../config-validator.js';
 
 const mutex = new Mutex();
 
@@ -43,7 +43,7 @@ async function findId(searchCriteria: {}, entityType: string, requestId: number)
 	return entity;
 }
 
-export async function getId(searchTerms: Record<string, string>, requestId: number){
+export async function getId(searchTerms: Record<string, string>, requestId: number) {
 	const release = await mutex.acquire();
 	try {
 		const entityType = searchTerms.entityType;
@@ -59,7 +59,6 @@ export async function getId(searchTerms: Record<string, string>, requestId: numb
 	} finally {
 		release();
 	}
-
 }
 
 export async function findIdFor(searchTerms: Record<string, string>, requestId: number) {
@@ -70,20 +69,19 @@ export async function findIdFor(searchTerms: Record<string, string>, requestId: 
 	return (await findId(keyCriteria, entityType, requestId)) || 'Id not found for this search criteria';
 }
 
-
 function validateEntityType(entityType: string) {
 	if (!Object.values(config.entityList).includes(entityType)) {
-		throw new InvalidEntityError('Invalid entity type: '+entityType, 400);
+		throw new InvalidEntityError('Invalid entity type: ' + entityType, 400);
 	}
 }
 
-function validateSearchParams(searchCriteria: RecordType<string, string>){
+function validateSearchParams(searchCriteria: RecordType<string, string>) {
 	var format = /[\^°<>#,*~!"§$%?®©¶\s]+/;
 	const keys = Object.keys(searchCriteria) as (keyof typeof searchCriteria)[];
 	for (let i = 0; i <= keys.length - 1; i++) {
 		const searchString = searchCriteria[keys[i]];
-		if(format.test(searchString) || searchString.length<1){
-			throw new InvalidRequestError("Invalid value '"+searchString+"' for "+keys[i], 400)
+		if (format.test(searchString) || searchString.length < 1) {
+			throw new InvalidRequestError("Invalid value '" + searchString + "' for " + keys[i], 400);
 		}
 	}
 }
@@ -91,6 +89,8 @@ function validateSearchParams(searchCriteria: RecordType<string, string>){
 function getSearchCriteria(entity: string, requestParams: Record<string, string>) {
 	const property = `${entity.toUpperCase()}_SEARCH`;
 	const keyCriteria = getRecord(property).parse(JSON.parse(process.env[property] || '[]'));
+	console.log("keyCriteria: ");
+	console.log(keyCriteria);
 	for (const param in requestParams) {
 		if (keyCriteria.hasOwnProperty(param)) {
 			keyCriteria[param] = requestParams[param];

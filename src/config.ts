@@ -1,19 +1,20 @@
 import * as dotenv from 'dotenv';
 import {
-	getArray, getRecord,
+	getArray,
+	getRecord,
 	getRequiredArray,
 	getRequiredNumber,
 	getRequiredString,
 	getSchemaDef,
-	getUrl
-} from "./config-validator.js";
-import {SchemaInfo} from "./middlewares/datasource";
+	getUrl,
+} from './config-validator.js';
+import { SchemaInfo } from './middlewares/datasource';
+import {RecordType} from "zod";
 
 if (dotenv.config().error) {
 	console.log(`Error loading environment variables, aborting.`);
 	process.exit(1);
 }
-
 
 export const dbHost = getRequiredString('DB_HOST');
 export const dbUsername = getRequiredString('DB_USERNAME');
@@ -36,35 +37,17 @@ export const scopes = getRequiredArray('SCOPES');
 export const dbSequences = getArray('DB_SEQUENCES');
 
 
-/*entityList.forEach((entity) => {
-	getSchemaDef(entity).parse(JSON.parse(process.env[`${entity.toUpperCase()}_SCHEMA`] || '[]'));
-});*/
-
-export const schemaDefinitions : Map<string, SchemaInfo> = new Map<string, SchemaInfo>();
-
+export const schemaDefinitions: Map<string, SchemaInfo> = new Map<string, SchemaInfo>();
 entityList.forEach((entity) => {
 	const parseResult = getSchemaDef(entity).safeParse(JSON.parse(process.env[`${entity.toUpperCase()}_SCHEMA`] || '[]'));
-	if(!parseResult.success){
+	if (!parseResult.success) {
 		const message = JSON.stringify(parseResult.error.flatten());
 		throw new Error(`Environment value for "${entity}" is invalid with the following errors: ${message}`);
 	}
-	schemaDefinitions.set(entity, parseResult.data)
+	schemaDefinitions.set(entity, parseResult.data);
 });
 
 
 entityList.forEach((entity) => {
 	getRecord(entity).parse(JSON.parse(process.env[`${entity.toUpperCase()}_SEARCH`] || '[]'));
 });
-
-/*entityList.forEach((entity) => {
-	const searchProperty = process.env[entity.toUpperCase() + `_SEARCH`];
-	const searchRecord = getRecord(entity).parse(JSON.parse(process.env[entity.toUpperCase() + `_SEARCH`] || '[]'));
-	if(!searchRecord.success){
-		throw new Error(`Environment variable ${entity} is not valid. Please provide an array of strings.`);
-	}
-});*/
-
-/*export const tableDefinitions = entityList.reduce<Map<string, z.ZodType<SchemaInfo>>>((acc, entityName) => {
-	const tableDefinition = getSchemaDef(entityName);
-	return acc.set(entityName, tableDefinition);
-}, new Map());*/
