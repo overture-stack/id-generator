@@ -1,9 +1,8 @@
-import { NextFunction, Request, response, Response } from 'express';
-import { InvalidEntityError, InvalidRequestError } from '../middlewares/error-handler.js';
+import { InvalidEntityError, InvalidSearchValuesError } from '../middlewares/error-handler.js';
 import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
-import { date, RecordType } from 'zod';
+import { RecordType } from 'zod';
 import { getRecord } from '../config-validator.js';
 
 const mutex = new Mutex();
@@ -39,7 +38,6 @@ async function findId(searchCriteria: {}, entityType: string, requestId: number)
 	}
 
 	const entity = await query.addSelect([schemaInfo.tablename + '.entityId']).getOne();
-	//await closeDBConnection(next, requestId).then(() => console.log('DB connection closed'));
 	return entity;
 }
 
@@ -81,7 +79,7 @@ function validateSearchParams(searchCriteria: RecordType<string, string>) {
 	for (let i = 0; i <= keys.length - 1; i++) {
 		const searchString = searchCriteria[keys[i]];
 		if (format.test(searchString) || searchString.length < 1) {
-			throw new InvalidRequestError("Invalid value '" + searchString + "' for " + keys[i], 400);
+			throw new InvalidSearchValuesError("Invalid value '" + searchString + "' for " + keys[i], 400);
 		}
 	}
 }

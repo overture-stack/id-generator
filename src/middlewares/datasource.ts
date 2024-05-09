@@ -2,7 +2,6 @@ import {
 	Column,
 	ColumnType,
 	Connection,
-	createConnection,
 	CreateDateColumn,
 	DataSource,
 	Entity,
@@ -47,26 +46,6 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 		Column({ type, default: () => defaultValue, unique })(DynamicEntity.prototype, key);
 	});
 
-	/*const isConnected =
-		connectionManager.has(requestId.toString()) && connectionManager.get(requestId.toString()).isConnected;
-	if (!isConnected) {
-		connection = await createConnection({
-			type: 'postgres',
-			name: requestId.toString(),
-			host: config.dbHost,
-			username: config.dbUsername,
-			password: config.dbPassword,
-			port: config.dbPort,
-			database: config.dbName,
-			schema: config.dbSchema,
-			synchronize: dbSync,
-			logging: config.logging,
-			entities: [DynamicEntity],
-		});
-	}*/
-
-	//const repository = connection.getRepository(DynamicEntity);
-
 	const dataSourceConn = new DataSource({
 		type: 'postgres',
 		name: requestId.toString(),
@@ -93,7 +72,6 @@ export async function createSequences(sql: string) {
 }
 
 export function getTableDefinition(entity: string) {
-	//const schema = getSchemaDef(entity.toUpperCase() + `_SCHEMA`).parse(JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || '')); //UK: uncomment this
 	const schema = config.schemaDefinitions.get(entity) || schemaInfo;
 	return schema;
 }
@@ -128,23 +106,6 @@ export async function initializeDB() {
 }
 
 export async function getDBConnection(name: string) {
-	/*const isConnected = connectionManager.has(name) && connectionManager.get(name).isConnected;
-	if (!isConnected) {
-		return await createConnection({
-			type: 'postgres',
-			host: config.dbHost,
-			username: config.dbUsername,
-			password: config.dbPassword,
-			port: config.dbPort,
-			database: config.dbName,
-			schema: config.dbSchema,
-			synchronize: config.dbSync,
-			logging: config.logging,
-		});
-	} else {
-		return connectionManager.get(name);
-	}*/
-
 	const dataSourceConn = new DataSource({
 		type: 'postgres',
 		host: config.dbHost,

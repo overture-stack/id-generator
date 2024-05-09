@@ -21,10 +21,10 @@ export class IdGenerationError extends Error {
 	}
 }
 
-export class InvalidRequestError extends IdGenerationError {
+export class InvalidSearchValuesError extends IdGenerationError {
 	constructor(message: string, statusCode: Number) {
 		super(message, statusCode);
-		this.name = 'InvalidRequestError';
+		this.name = 'InvalidSearchValuesError';
 		this.statusCode = statusCode;
 	}
 }

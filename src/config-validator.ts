@@ -1,4 +1,4 @@
-import { z, ZodArray, ZodMap, ZodNumber, ZodRecord, ZodString } from 'zod';
+import { z, ZodRecord, ZodString } from 'zod';
 import { SchemaInfo } from './middlewares/datasource';
 
 function getRequiredEnvVar(name: string) {
