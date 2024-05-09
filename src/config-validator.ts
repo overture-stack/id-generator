@@ -45,12 +45,18 @@ export const getRequiredArray = (name: string): ZodString['_output'][] => {
 };
 
 export const getArray = (name: string): ZodString['_output'][] => {
-	const value = JSON.parse(process.env[name] || '[]');
-	const stringArray = z.array(z.string()).safeParse(value);
-	if (!stringArray.success) {
-		throw new Error(`Environment variable ${name} is not valid. Please provide an array of strings.`);
+	try {
+		const value = JSON.parse(process.env[name] || '[]');
+		const stringArray = z.array(z.string()).safeParse(value);
+		if (!stringArray.success) {
+			const message = stringArray.error.flatten();
+			throw new Error();
+		}
+		return stringArray.data;
+	} catch (e) {
+		throw new Error(`Environment variable ${name} is not valid. Please provide an array of strings.`)
 	}
-	return stringArray.data;
+
 };
 
 export const getRecord = (name: string): ZodRecord<ZodString, ZodString> => {
