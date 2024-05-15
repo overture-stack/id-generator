@@ -87,8 +87,6 @@ function validateSearchParams(searchCriteria: RecordType<string, string>) {
 function getSearchCriteria(entity: string, requestParams: Record<string, string>) {
 	const property = `${entity.toUpperCase()}_SEARCH`;
 	const keyCriteria = getRecord(property).parse(JSON.parse(process.env[property] || '[]'));
-	console.log("keyCriteria: ");
-	console.log(keyCriteria);
 	for (const param in requestParams) {
 		if (keyCriteria.hasOwnProperty(param)) {
 			keyCriteria[param] = requestParams[param];
