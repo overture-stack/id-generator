@@ -4,7 +4,6 @@ export function defaultErrorHandler(err: IdGenerationError, req: Request, res: R
 	if (res.headersSent) {
 		return next(err);
 	}
-
 	res.json({
 		status: err.name,
 		message: err.message,

@@ -15,7 +15,6 @@ export function getIdForEntity(request: Request, response: Response, next: NextF
 	return getId({ ...request.params }, requestId)
 		.then((id) => response.status(200).json(id))
 		.catch((err) => {
-			//closeDBConnection(next, requestId).then(() => console.log('DB conn closed'));
 			next(err);
 		});
 }
@@ -26,7 +25,6 @@ export function findIdForEntity(request: Request, response: Response, next: Next
 	return findIdFor({ ...request.params }, requestId)
 		.then((id) => response.status(200).json(id))
 		.catch((err) => {
-			//closeDBConnection(next, requestId).then(() => console.log('DB conn closed'));
 			next(err);
 		});
 }

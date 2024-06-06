@@ -3,17 +3,14 @@ import { getTableDefinition, prepareDataSource } from '../middlewares/datasource
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
 import { RecordType } from 'zod';
-import { getRecord } from '../config-validator.js';
 
 const mutex = new Mutex();
 
 // create new id
 async function createId(searchCriteria: {}, entityType: string, requestId: number) {
-	console.log('******** CREATE CALLED :' + requestId);
+	console.log(`******** CREATE CALLED :${requestId}`);
 	const repo = await prepareDataSource(getTableDefinition(entityType), requestId, config.dbSync);
-
 	const savedEntity = await repo.save(searchCriteria);
-	//await closeDBConnection(next, requestId).then(() => console.log('DB connection closed'));
 	return savedEntity;
 }
 
@@ -86,7 +83,8 @@ function validateSearchParams(searchCriteria: RecordType<string, string>) {
 
 function getSearchCriteria(entity: string, requestParams: Record<string, string>) {
 	const property = `${entity.toUpperCase()}_SEARCH`;
-	const keyCriteria = getRecord(property).parse(JSON.parse(process.env[property] || '[]'));
+	const search = config.searchCriterias.get(entity);
+	const keyCriteria = {...search};
 	for (const param in requestParams) {
 		if (keyCriteria.hasOwnProperty(param)) {
 			keyCriteria[param] = requestParams[param];

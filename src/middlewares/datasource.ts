@@ -74,9 +74,9 @@ export async function initializeDBSequences() {
 	const sequenceList = getSequenceDefinition();
 	const sequenceInitializationPromises = sequenceList.map((seq) => {
 		return createSequences(seq)
-			.then(() => console.log('Sequence ' + seq + ' created'))
+			.then(() => console.log(`Sequence ${seq} created`))
 			.catch((err) => {
-				console.log('Error executing statement: ' + seq);
+				console.log(`Error executing statement: ${seq}`);
 				console.log(err);
 				process.exit(1);
 			});
@@ -93,8 +93,8 @@ export async function initializeDB() {
 	const dbInitializationPromises = entities.map((entity) => {
 		const schemaInfo = getTableDefinition(entity);
 		return prepareDataSource(schemaInfo, 1, true)
-			.then(() => console.log('Entity ' + entity + ' initialized'))
-			.catch(() => 'Error upon ' + entity + ' initialization');
+			.then(() => console.log(`Entity ${entity} initialized`))
+			.catch(() => console.log(`Error upon ${entity} initialization`));
 	});
 	await Promise.all(dbInitializationPromises);
 }
