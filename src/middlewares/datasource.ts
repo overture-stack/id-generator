@@ -1,15 +1,12 @@
 import {
 	Column,
 	ColumnType,
-	Connection,
 	CreateDateColumn,
 	DataSource,
 	Entity,
-	getConnectionManager,
 	PrimaryGeneratedColumn,
 	Unique,
 } from 'typeorm';
-import { NextFunction } from 'express';
 import * as config from '../config.js';
 
 export interface SchemaInfo {
@@ -24,9 +21,6 @@ const schemaInfo: SchemaInfo = new (class implements SchemaInfo {
 	tablename: string;
 })();
 
-
-export let connection = {} as Connection;
-const connectionManager = getConnectionManager();
 
 export async function prepareDataSource(schema: SchemaInfo, requestId: number, dbSync: boolean) {
 	@Entity({
@@ -121,15 +115,3 @@ export async function getDBConnection(name: string) {
 	return dataSourceConn;
 }
 
-export async function closeDBConnection(next: NextFunction, requestId: number) {
-	if (getConnectionManager().has(requestId.toString())) {
-		const conn = getConnectionManager().get(requestId.toString());
-
-		if (conn.isConnected) {
-			await conn.close();
-			console.log('DB conn closed');
-		} else {
-			console.log('DB conn already closed.');
-		}
-	}
-}

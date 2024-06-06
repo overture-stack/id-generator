@@ -1,5 +1,5 @@
 import { InvalidEntityError, InvalidSearchValueError } from '../middlewares/error-handler.js';
-import { closeDBConnection, getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
+import { getTableDefinition, prepareDataSource } from '../middlewares/datasource.js';
 import { Mutex } from 'async-mutex';
 import * as config from '../config.js';
 import { RecordType } from 'zod';
