@@ -14,7 +14,7 @@ async function createId(searchCriteria: {}, entityType: string, requestId: numbe
 	return savedEntity;
 }
 
-// check if an argo id exists for the submitter and program
+// check if an id exists for the given criteria
 async function findId(searchCriteria: {}, entityType: string, requestId: number) {
 	console.log('******** FIND CALLED :' + requestId);
 	const schemaInfo = getTableDefinition(entityType);
