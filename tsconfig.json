@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"module": "esnext",
+		"target": "es2017",
+		"outDir": "dist",
+		"sourceMap": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"strict": true,
+		"strictPropertyInitialization": false,
+		"useUnknownInCatchVariables": false,
+		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true
+	},
+	"exclude": ["node_modules"]
+}

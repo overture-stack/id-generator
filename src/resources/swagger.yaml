@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  title: Central id Management
+  version: 1.0.0
+#security:
+#  - bearerAuth: ['PROGRAMDATA-${programId}.WRITE', 'CLINICALSERVICE.WRITE']
+paths:
+  /{programId}/{submitterId}/{someOtherColumn}/{entityType}:
+    get:
+      tags:
+        - Central Id
+      summary: Get or create ARGO ID for any entity given program and submitter_sample_id
+      parameters:
+        - $ref: '#/components/parameters/PathProgramId'
+        - $ref: '#/components/parameters/PathSubmitterId'
+        - $ref: '#/components/parameters/PathEntityType'
+        - $ref: '#/components/parameters/PathSomeCol'
+      responses:
+        '200':
+          description: 'Create new or return an existing argo id.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          description: 'Invalid Entity Error.'
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/responses/IdGenerationError'
+                - $ref: '#/components/responses/IdGenerationError'
+
+  /{programId}/{submitterId}/{someOtherColumn}/{entityType}/find:
+    get:
+      tags:
+        - Central Id
+      summary: Get an existing ARGO ID for any entity given program and submitter_sample_id
+      parameters:
+        - $ref: '#/components/parameters/PathProgramId'
+        - $ref: '#/components/parameters/PathSubmitterId'
+        - $ref: '#/components/parameters/PathEntityType'
+        - $ref: '#/components/parameters/PathSomeCol'
+      responses:
+        '200':
+          description: 'Return an existing argo id.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          description: 'Invalid Entity or Invalid Value for Request Param.'
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/responses/IdGenerationError'
+                - $ref: '#/components/responses/IdGenerationError'
+
+servers:
+  - url: /
+
+components:
+  parameters:
+    PathProgramId:
+      name: programId
+      description: Short Name of the program (ex. ABCD-EF)
+      in: path
+      required: false
+      schema:
+        type: string
+    PathSubmitterId:
+      name: submitterId
+      description: Submitter Id of the entity
+      in: path
+      required: false
+      schema:
+        type: string
+    PathEntityType:
+      name: entityType
+      description: Entity Type of the entity
+      in: path
+      required: false
+      schema:
+        type: string
+    PathSomeCol:
+      name: someOtherColumn
+      description: someOtherColumn of the entity
+      in: path
+      required: false
+      schema:
+        type: string
+
+  responses:
+    IdGenerationError:
+      description: Entity type in the request not present in the list of entities
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              code:
+                type: string
+                enum: ['INVALID_ENTITY']
+              status:
+                type: string
+    InvalidRequestError:
+      description: Value of the request param is invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              code:
+                type: string
+                enum: ['INVALID_VALUE']
+              status:
+                type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Entity:
+      type: object
+      required:
+        - _id
+        - programId
+        - submitterId
+        - createdAt
+        - entityId
+      properties:
+        entityId:
+          type: string
+          description: the id for this entry of entity id
