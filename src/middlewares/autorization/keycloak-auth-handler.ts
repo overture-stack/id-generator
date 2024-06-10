@@ -40,7 +40,7 @@ class KeycloakAuth implements AuthorizationStrategy {
 		try {
 			if (!(await this.hasPermissions(token))) {
 				res.statusCode = 403;
-				throw new ForbiddenError('Forbidden. Permission Denied');
+				throw new ForbiddenError('Forbidden. Permission Denied', 403);
 			}
 		} catch (e) {
 			if (e instanceof ForbiddenError) {
@@ -49,7 +49,7 @@ class KeycloakAuth implements AuthorizationStrategy {
 			} else {
 				console.log(e);
 				res.statusCode = 401;
-				throw new UnauthorizedError('You need to be authenticated for this request.');
+				throw new UnauthorizedError('You need to be authenticated for this request.', 401);
 			}
 		}
 	}

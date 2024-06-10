@@ -1,15 +1,12 @@
 import {
 	Column,
 	ColumnType,
-	Connection,
-	createConnection,
 	CreateDateColumn,
+	DataSource,
 	Entity,
-	getConnectionManager,
 	PrimaryGeneratedColumn,
 	Unique,
 } from 'typeorm';
-import { NextFunction } from 'express';
 import * as config from '../config.js';
 import { getSchemaDef } from '../config-validator.js';
 
@@ -19,8 +16,11 @@ export interface SchemaInfo {
 	index: string[][];
 }
 
-export let connection = {} as Connection;
-const connectionManager = getConnectionManager();
+const schemaInfo: SchemaInfo = new (class implements SchemaInfo {
+	columns: { name: string; type: ColumnType; defaultValue?: string; unique?: boolean }[];
+	index: string[][];
+	tablename: string;
+})();
 
 export async function prepareDataSource(schema: SchemaInfo, requestId: number, dbSync: boolean) {
 	@Entity({
@@ -40,25 +40,21 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 		Column({ type, default: () => defaultValue, unique })(DynamicEntity.prototype, key);
 	});
 
-	const isConnected =
-		connectionManager.has(requestId.toString()) && connectionManager.get(requestId.toString()).isConnected;
-	if (!isConnected) {
-		connection = await createConnection({
-			type: 'postgres',
-			name: requestId.toString(),
-			host: config.dbHost,
-			username: config.dbUsername,
-			password: config.dbPassword,
-			port: config.dbPort,
-			database: config.dbName,
-			schema: config.dbSchema,
-			synchronize: dbSync,
-			logging: config.logging,
-			entities: [DynamicEntity],
-		});
-	}
-
-	const repository = connection.getRepository(DynamicEntity);
+	const dataSourceConn = new DataSource({
+		type: 'postgres',
+		name: requestId.toString(),
+		host: config.dbHost,
+		username: config.dbUsername,
+		password: config.dbPassword,
+		port: config.dbPort,
+		database: config.dbName,
+		schema: config.dbSchema,
+		synchronize: dbSync,
+		logging: config.logging,
+		entities: [DynamicEntity],
+	});
+	await dataSourceConn.initialize();
+	const repository = dataSourceConn.getRepository(DynamicEntity);
 	return repository;
 }
 
@@ -80,9 +76,7 @@ export async function createSequences(sql: string) {
 }
 
 export function getTableDefinition(entity: string) {
-	const schema = getSchemaDef(entity.toUpperCase() + `_SCHEMA`).parse(
-		JSON.parse(process.env[entity.toUpperCase() + `_SCHEMA`] || ''),
-	);
+	const schema = config.schemaDefinitions.get(entity) || schemaInfo;
 	return schema;
 }
 
@@ -90,9 +84,9 @@ export async function initializeDBSequences() {
 	const sequenceList = getSequenceDefinition();
 	const sequenceInitializationPromises = sequenceList.map((seq) => {
 		return createSequences(seq)
-			.then(() => console.log('Sequence ' + seq + ' created'))
+			.then(() => console.log(`Sequence ${seq} created`))
 			.catch((err) => {
-				console.log('Error executing statement: ' + seq);
+				console.log(`Error executing statement: ${seq}`);
 				console.log(err);
 				process.exit(1);
 			});
@@ -109,40 +103,25 @@ export async function initializeDB() {
 	const dbInitializationPromises = entities.map((entity) => {
 		const schemaInfo = getTableDefinition(entity);
 		return prepareDataSource(schemaInfo, 1, true)
-			.then(() => console.log('Entity ' + entity + ' initialized'))
-			.catch(() => 'Error upon ' + entity + ' initialization');
+			.then(() => console.log(`Entity ${entity} initialized`))
+			.catch(() => console.log(`Error upon ${entity} initialization`));
 	});
 	await Promise.all(dbInitializationPromises);
 }
 
 export async function getDBConnection(name: string) {
-	const isConnected = connectionManager.has(name) && connectionManager.get(name).isConnected;
-	if (!isConnected) {
-		return await createConnection({
-			type: 'postgres',
-			host: config.dbHost,
-			username: config.dbUsername,
-			password: config.dbPassword,
-			port: config.dbPort,
-			database: config.dbName,
-			schema: config.dbSchema,
-			synchronize: config.dbSync,
-			logging: config.logging,
-		});
-	} else {
-		return connectionManager.get(name);
-	}
+	const dataSourceConn = new DataSource({
+		type: 'postgres',
+		host: config.dbHost,
+		username: config.dbUsername,
+		password: config.dbPassword,
+		port: config.dbPort,
+		database: config.dbName,
+		schema: config.dbSchema,
+		synchronize: config.dbSync,
+		logging: config.logging,
+	});
+	await dataSourceConn.initialize();
+	return dataSourceConn;
 }
 
-export async function closeDBConnection(next: NextFunction, requestId: number) {
-	if (getConnectionManager().has(requestId.toString())) {
-		const conn = getConnectionManager().get(requestId.toString());
-
-		if (conn.isConnected) {
-			await conn.close();
-			console.log('DB conn closed');
-		} else {
-			console.log('DB conn already closed.');
-		}
-	}
-}

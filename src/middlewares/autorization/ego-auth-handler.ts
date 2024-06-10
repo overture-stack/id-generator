@@ -47,7 +47,7 @@ class EgoAuth implements AuthorizationStrategy {
 		try {
 			if (!(await this.hasPermissions(bearerToken))) {
 				res.statusCode = 403;
-				throw new ForbiddenError('Forbidden. Permission Denied');
+				throw new ForbiddenError('Forbidden. Permission Denied', 403);
 			}
 		} catch (e) {
 			if (e instanceof ForbiddenError) {
@@ -56,7 +56,7 @@ class EgoAuth implements AuthorizationStrategy {
 			} else {
 				console.log(e);
 				res.statusCode = 401;
-				throw new UnauthorizedError('You need to be authenticated for this request.');
+				throw new UnauthorizedError('You need to be authenticated for this request.', 401);
 			}
 		}
 	}
