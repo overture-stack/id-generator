@@ -14,7 +14,7 @@ class EgoAuth implements AuthorizationStrategy {
 			return response.data;
 		},
 		{
-			maxAge: ms('1h'),
+			maxAge: ms(config.publicKeyCache),
 			preFetch: true,
 		},
 	);

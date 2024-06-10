@@ -31,7 +31,7 @@ export const getString = (name: string): string => {
     const value = process.env[name] || '';
     const stringValue = z.string().safeParse(value);
     if (!stringValue.success) {
-        throw new Error('property ' + name + ' in config is not a valid string');
+        throw new Error(`Environment variable ${name} in config is not a valid string`);
     }
     return stringValue.data;
 };
@@ -87,65 +87,6 @@ export const getRecord = (name: string): ZodRecord<ZodString, ZodString> => {
 };
 
 export const getSchemaDef = (name: string): z.ZodType<SchemaInfo> => {
-	const config_entry = name.toUpperCase() + `_SCHEMA`;
-	return z.object(
-		{
-			tablename: z
-				.string({
-					required_error: 'tablename in ' + config_entry + ' is required',
-					invalid_type_error: 'tablename in ' + config_entry + ' is invalid',
-				})
-				.trim()
-				.min(1, { message: 'tablename in ' + config_entry + ' cannot be empty' }),
-			columns: z
-				.array(
-					z.object({
-						name: z.string({ required_error: 'column `name` in ' + config_entry + ' is missing' }),
-						type: z.union(
-							[
-								z.literal('float'),
-								z.literal('varchar'),
-								z.literal('number'),
-								z.literal('date'),
-								z.literal('varchar2'),
-								z.literal('string'),
-								z.literal('timestamp'),
-								z.literal('double'),
-								z.literal('boolean'),
-							],
-							{
-								invalid_type_error: '`type` in ' + config_entry + ' has an invalid value.',
-								required_error: '`type` in ' + config_entry + ' is required.',
-							},
-						),
-						defaultValue: z
-							.string({ invalid_type_error: 'value for `defaultValue` in ' + config_entry + ' is invalid' })
-							.optional(),
-						unique: z.boolean({ invalid_type_error: 'value for `unique` in ' + config_entry + ' is invalid' }).optional(),
-					}),
-					{
-						invalid_type_error: '`columns` in ' + config_entry + ' should be an array',
-					},
-				)
-				.nonempty({ message: '`column` array in  ' + config_entry + ' should not be empty' }),
-			index: z
-				.array(
-					z.string({
-						invalid_type_error: '`index` in  ' + config_entry + ' is invalid. It should be a list of column name strings',
-					}),
-					{
-						invalid_type_error: '`index` in  ' + config_entry + ' is invalid. It should be a list of column name strings',
-						required_error: '`index` in  ' + config_entry + ' is missing.',
-					},
-				)
-				.nonempty({ message: '`index` in ' + config_entry + ' is required' }),
-		},
-		{ invalid_type_error: 'Schema definition missing for entity <' + name + '> in the ENTITY_LIST' },
-	);
-};
-
-/*
-export const getSchemaDef = (name: string): z.ZodType<SchemaInfo> => {
     const config_entry = name.toUpperCase() + `_SCHEMA`;
     return z.object(
         {
@@ -181,17 +122,6 @@ export const getSchemaDef = (name: string): z.ZodType<SchemaInfo> => {
                     },
                 )
                 .nonempty({ message: 'column array in  ' + config_entry + ' should not be empty' }),
-            /!*index: z
-                .array(
-                    z.string({
-                        invalid_type_error: 'index in  ' + config_entry + ' is invalid. It should be a list of column name strings',
-                    }),
-                    {
-                        invalid_type_error: 'index in  ' + config_entry + ' is invalid. It should be a list of column name strings',
-                        required_error: 'index in  ' + config_entry + ' is missing.',
-                    },
-                )
-                .nonempty({ message: 'index in ' + config_entry + ' is required' }),*!/
             index: z
                 .array(
                     z.array(
@@ -215,4 +145,4 @@ export const getSchemaDef = (name: string): z.ZodType<SchemaInfo> => {
         },
         { invalid_type_error: 'Schema definition missing for entity <' + name + '> in the ENTITY_LIST' },
     );
-};*/
+};

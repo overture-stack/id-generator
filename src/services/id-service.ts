@@ -81,24 +81,6 @@ function validateSearchParams(searchCriteria: RecordType<string, string>) {
 	}
 }
 
-/*function validateSearchParams(searchCriteria: RecordType<string, string>, next: NextFunction) {
-	//var format = /[\^°<>#,*~!"@& ('"}.={+`)§$%?®©¶\s]+/;
-	var reg = config.requestRegex;
-	var format = new RegExp(reg);
-	//var format = config.requestRegex;
-	var formatReg = /[\^°<>#,*~!"@&('"}={+`)§$%?®©¶\s]+/;
-	console.log('regular exp: ' + format.toString());
-	console.log('regular exp: ' + formatReg.toString());
-	const keys = Object.keys(searchCriteria) as (keyof typeof searchCriteria)[];
-	for (let i = 0; i <= keys.length - 1; i++) {
-		const searchString = searchCriteria[keys[i]];
-		if (format.test(searchString) || searchString.length < 1) {
-			response.status(400);
-			throw new InvalidRequestError("Invalid value '" + searchString + "' for " + keys[i]);
-		}
-	}
-}*/
-
 function getSearchCriteria(entity: string, requestParams: Record<string, string>) {
 	const property = `${entity.toUpperCase()}_SEARCH`;
 	const search = config.searchCriterias.get(entity);

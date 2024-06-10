@@ -18,7 +18,7 @@ if (dotenv.config().error) {
 	process.exit(1);
 }
 
-export const requestRegex = getString('REQUEST_VALIDATOR') || '[\\^°<>#,~*!@&(\'}={+`)§$%?®©¶\\s]+';
+export const publicKeyCache = getString('AUTH_PUBLICKEY_CACHE') || '1h';
 
 export const dbHost = getRequiredString('DB_HOST');
 export const dbUsername = getRequiredString('DB_USERNAME');
