@@ -16,7 +16,6 @@ function getAuthStrategy() {
 	}
 }
 
-/// ego-KC switch
 export function authorize(action: string): MethodDecorator {
 	console.log('authorize called');
 	return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
