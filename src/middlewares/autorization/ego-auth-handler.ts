@@ -37,8 +37,13 @@ class EgoAuth implements AuthorizationStrategy {
 				Authorization: 'Basic ' + basicAuth,
 			},
 		};
-		const response = await axios.post(config.authServerUrl + '/o/check_api_key?apiKey=' + token, null, headers);
-		return response.data;
+		try{
+			const response = await axios.post(config.authServerUrl + '/o/check_api_key?apiKey=' + token, null, headers);
+			return response.data;
+		}catch(e){
+			console.log(e);
+			throw new NetworkError('EGO connection failure', 500);
+		}
 	};
 
 	verifyEgoToken = async (token: string) => {
@@ -51,18 +56,13 @@ class EgoAuth implements AuthorizationStrategy {
 		const bearerToken = extractHeaderToken(req);
 		try {
 			if (!(await this.hasPermissions(bearerToken))) {
-				res.statusCode = 403;
 				throw new ForbiddenError('Forbidden. Permission Denied', 403);
 			}
 		} catch (e) {
-			if (e instanceof ForbiddenError) {
-				//res.statusCode = 403;
-				throw e;
-			}if(e instanceof NetworkError){
+			if (e instanceof ForbiddenError || e instanceof NetworkError) {
 				throw e;
 			} else {
 				console.log(e);
-				//res.statusCode = 401;
 				throw new UnauthorizedError(e.message, 401);
 			}
 		}
@@ -76,21 +76,6 @@ class EgoAuth implements AuthorizationStrategy {
 		}
 	}
 
-	/*async handleJwt(bearerToken: string) {
-		let valid = false;
-		valid = !!(bearerToken && (await this.verifyEgoToken(bearerToken)));
-		if (!valid) {
-			throw new Error();
-		} else {
-			const authToken = jwt.decode(bearerToken) as { [key: string]: any };
-			const tokenScopes = authToken['context']['scope'];
-			if (!this.scopeChecker(tokenScopes)) {
-				console.log('Invalid scopes');
-				return false;
-			}
-			return true;
-		}
-	}*/
 
 	async handleJwt(bearerToken: string) {
 		let valid = false;
