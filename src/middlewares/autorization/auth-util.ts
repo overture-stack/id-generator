@@ -35,10 +35,8 @@ export function authorize(action: string): MethodDecorator {
 }
 
 export function extractHeaderToken(req: Request) {
-	const { authorization: authorizationHeader } = req.headers;
-	const { authorization: authorizationBody } = req.body || {};
-	const authorization = authorizationHeader || authorizationBody;
-	const token: string = authorization ? authorization.split(' ')[1] : req.query.key;
+	const authorization = req.headers.authorization||'';
+	const token: string = authorization.split(' ')[1];
 	return token;
 }
 
