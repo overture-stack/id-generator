@@ -43,6 +43,7 @@ export function extractHeaderToken(req: Request) {
 export function isJwt(tokenString: string) {
 	if (!tokenString) {
 		console.log('Token missing');
+		throw new Error('Token missing');
 	}
 	const jwtSplitted = tokenString.split('.');
 	if (jwtSplitted.length != 3) {

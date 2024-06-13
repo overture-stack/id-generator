@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { ForbiddenError, UnauthorizedError } from '../error-handler.js';
+import {ForbiddenError, NetworkError, UnauthorizedError} from '../error-handler.js';
 import jwt from 'jsonwebtoken';
 import memoize from 'memoizee';
 import axios from 'axios';
@@ -10,8 +10,13 @@ import { AuthorizationStrategy, extractHeaderToken, isJwt } from './auth-util.js
 class EgoAuth implements AuthorizationStrategy {
 	getKey = memoize(
 		async (egoURL: string) => {
-			const response = await axios.get(egoURL);
-			return response.data;
+			try {
+				const response = await axios.get(egoURL);
+				return response.data;
+			}catch(e){
+				console.log(e);
+				throw new NetworkError('EGO connection failure', 500);
+			}
 		},
 		{
 			maxAge: ms(config.publicKeyCache),
@@ -51,12 +56,14 @@ class EgoAuth implements AuthorizationStrategy {
 			}
 		} catch (e) {
 			if (e instanceof ForbiddenError) {
-				res.statusCode = 403;
+				//res.statusCode = 403;
+				throw e;
+			}if(e instanceof NetworkError){
 				throw e;
 			} else {
 				console.log(e);
-				res.statusCode = 401;
-				throw new UnauthorizedError('You need to be authenticated for this request.', 401);
+				//res.statusCode = 401;
+				throw new UnauthorizedError(e.message, 401);
 			}
 		}
 	}
@@ -69,7 +76,7 @@ class EgoAuth implements AuthorizationStrategy {
 		}
 	}
 
-	async handleJwt(bearerToken: string) {
+	/*async handleJwt(bearerToken: string) {
 		let valid = false;
 		valid = !!(bearerToken && (await this.verifyEgoToken(bearerToken)));
 		if (!valid) {
@@ -83,7 +90,29 @@ class EgoAuth implements AuthorizationStrategy {
 			}
 			return true;
 		}
+	}*/
+
+	async handleJwt(bearerToken: string) {
+		let valid = false;
+		valid = !!(bearerToken && (await this.verifyEgoToken(bearerToken)));
+		if (!valid) {
+			console.log('Token not valid');
+			throw new UnauthorizedError('Invalid token', 401);
+		} else {
+			const authToken = jwt.decode(bearerToken);
+			if (!authToken || typeof authToken === "string") {
+				console.log('Error decoding token');
+				throw new UnauthorizedError('Error decoding token', 401);
+			}
+			const tokenScopes = authToken['context']['scope'];
+			if (!this.scopeChecker(tokenScopes)) {
+				console.log('Invalid scopes');
+				return false;
+			}
+			return true;
+		}
 	}
+
 
 	async handleApiKey(token: string) {
 		const tokenJson = await this.verifyApiKey(token);

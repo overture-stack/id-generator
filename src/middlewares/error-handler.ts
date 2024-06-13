@@ -52,3 +52,11 @@ export class ForbiddenError extends IdGenerationError {
 		this.statusCode = statusCode;
 	}
 }
+
+export class NetworkError extends IdGenerationError {
+	constructor(message: string, statusCode: Number) {
+		super(message, statusCode);
+		this.name = 'NetworkError';
+		this.statusCode = statusCode;
+	}
+}
