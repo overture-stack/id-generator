@@ -23,6 +23,7 @@ USER node
 RUN mkdir dist && mkdir node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder --chown=node:node /app/entry-point.sh .
+COPY --from=builder /app/package.json .
+COPY --from=builder /app/package-lock.json .
 EXPOSE 3221
-CMD ["./entry-point.sh"]
+CMD node dist/server.js
