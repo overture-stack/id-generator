@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import {authStrategy, securedApi} from '../../config.js';
 import egoAuth from './ego-auth-handler.js';
 import keycloakAuth from './keycloak-auth-handler.js';
-import { ForbiddenError, UnauthorizedError } from '../error-handler';
 
 function getAuthStrategy() {
 	if (authStrategy === 'EGO') {
@@ -26,8 +25,12 @@ export function authorize(action: string){
 
 export function extractHeaderToken(req: Request) {
 	const authorization = req.headers.authorization||'';
-	const token: string = authorization.split(' ')[1];
-	return token;
+	console.log(authorization);
+	if (authorization.startsWith('Bearer ')) {
+		const token = authorization.substring(7, authorization.length);
+		return token;
+	}
+	return '';
 }
 
 export function isJwt(tokenString: string) {

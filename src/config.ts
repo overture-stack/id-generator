@@ -12,7 +12,7 @@ import {
 } from './config-validator.js';
 import { SchemaInfo } from './middlewares/datasource.js';
 import {RecordType, z} from "zod";
-import {authList, AuthStrategy} from "./middlewares/autorization/auth-types.js";
+import {apiList, authList, AuthStrategy, SecuredApi} from "./middlewares/autorization/auth-types.js";
 
 if (dotenv.config().error) {
 	console.log(`Error loading environment variables, aborting.`);
@@ -41,8 +41,10 @@ export const logging: boolean = JSON.parse(process.env.DB_LOGGING || 'false');
 export const entityList = getRequiredArray('ENTITY_LIST');
 
 export const scopes = getArray('SCOPES');
-export const securedApi = getArray('SECURED_API');
 export const dbSequences = getArray('DB_SEQUENCES');
+
+export const securedApi = getArray('SECURED_API');
+securedApi.forEach(api => {getEnum('SECURED_API', z.enum(apiList), api)});
 
 export const authStrategy: AuthStrategy = getEnum('AUTH_STRATEGY', z.enum(authList));
 
