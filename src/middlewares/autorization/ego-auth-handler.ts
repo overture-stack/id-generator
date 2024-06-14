@@ -5,7 +5,8 @@ import memoize from 'memoizee';
 import axios from 'axios';
 import ms from 'ms';
 import * as config from '../../config.js';
-import { AuthorizationStrategy, extractHeaderToken, isJwt } from './auth-util.js';
+import { extractHeaderToken, isJwt } from './auth-util.js';
+import {AuthorizationStrategy} from "./auth-types.js";
 
 class EgoAuth implements AuthorizationStrategy {
 	getKey = memoize(

@@ -2,7 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { Issuer } from 'openid-client';
 import * as config from '../../config.js';
 import { ForbiddenError, UnauthorizedError } from '../error-handler.js';
-import { AuthorizationStrategy, extractHeaderToken, isJwt } from './auth-util.js';
+import { extractHeaderToken, isJwt } from './auth-util.js';
+import {AuthorizationStrategy} from "./auth-types.js";
 import axios from 'axios';
 
 interface Permissions {

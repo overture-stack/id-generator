@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
 import { findIdFor, getId } from '../services/id-service.js';
-import { authorize } from '../middlewares/autorization/auth-util.js';
 
 
 class ServiceRouter {
@@ -12,7 +11,6 @@ class ServiceRouter {
 		return response.send(healthcheck);
 	}
 
-	@authorize('CREATE')
 	getIdForEntity(request: Request, response: Response, next: NextFunction) {
 		const requestId = Date.now();
 		console.log(requestId);
@@ -23,7 +21,6 @@ class ServiceRouter {
 			});
 	}
 
-	@authorize('FIND')
 	findIdForEntity(request: Request, response: Response, next: NextFunction) {
 		const requestId = Date.now();
 		console.log(requestId);

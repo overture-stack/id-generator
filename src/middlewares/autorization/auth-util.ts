@@ -4,10 +4,6 @@ import egoAuth from './ego-auth-handler.js';
 import keycloakAuth from './keycloak-auth-handler.js';
 import { ForbiddenError, UnauthorizedError } from '../error-handler';
 
-export interface AuthorizationStrategy {
-	authHandler(req: Request, res: Response, next: NextFunction): Promise<void>;
-}
-
 function getAuthStrategy() {
 	if (authStrategy === 'EGO') {
 		return egoAuth;
@@ -16,22 +12,16 @@ function getAuthStrategy() {
 	}
 }
 
-export function authorize(action: string): MethodDecorator {
-	console.log('authorize called');
-	return (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
-		const origFunction = descriptor.value;
-		descriptor.value = async function (...args: any[]) {
-			const request = arguments[0] as Request;
-			const response = arguments[1] as Response;
-			const next = arguments[2] as NextFunction;
-			try {
-				if(securedApi.length == 0 || securedApi.includes(action)) await getAuthStrategy()?.authHandler(request, response, next);
-				origFunction.apply(this, args);
-			} catch (err) {
-				next(err);
-			}
-		};
-	};
+export function authorize(action: string){
+	return async (req: Request, res: Response, next: NextFunction) => {
+		console.log('authorize called');
+		try {
+			if(securedApi.length == 0 || securedApi.includes(action)) await getAuthStrategy()?.authHandler(req, res, next);
+		} catch (err) {
+			next(err);
+		}
+		next();
+	}
 }
 
 export function extractHeaderToken(req: Request) {

@@ -1,5 +1,5 @@
-import { z, ZodRecord, ZodString } from 'zod';
-import { SchemaInfo } from './middlewares/datasource';
+import {z, ZodEnum, ZodRecord, ZodString} from 'zod';
+import { SchemaInfo } from './middlewares/datasource.js';
 
 function getRequiredEnvVar(name: string) {
 	const property = process.env[name];
@@ -67,12 +67,11 @@ export const getArray = (name: string): ZodString['_output'][] => {
 	}
 };
 
-export const getEnum = (name: string, enumList: string[]): string => {
-    const zEnum = z.enum(['', ...enumList]);
-    const value = process.env[name] || '';
+export const getEnum = <T extends [string, ...string[]]>(name: string, zEnum: ZodEnum<T>): z.infer<ZodEnum<T>> => {
+    const value = process.env[name];
     const stringValue = zEnum.safeParse(value);
     if (!stringValue.success) {
-        throw new Error('property ' + name + ' in config is not a valid. Value should be one of ' + enumList.toString());
+        throw new Error(`Environment variable ${name} is invalid value. Value should be one of ${zEnum.options}`);
     }
     return stringValue.data;
 };
@@ -80,8 +79,8 @@ export const getEnum = (name: string, enumList: string[]): string => {
 export const getRecord = (name: string): ZodRecord<ZodString, ZodString> => {
 	const config_entry = `${name.toUpperCase()}_SEARCH`;
 	return z.record(
-		z.string({ invalid_type_error: 'Invalid key in ' + config_entry + '. Should be a string' }),
-		z.string({ invalid_type_error: 'Invalid value in ' + config_entry + '. Should be a string' }),
+		z.string({ invalid_type_error: `Invalid key in ${config_entry}. Should be a string` }),
+		z.string({ invalid_type_error: `Invalid value in ${config_entry}. Should be a string` }),
 		{ invalid_type_error: `Environment variable ${config_entry} is invalid or missing` },
 	);
 };
