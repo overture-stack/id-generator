@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 
 export function defaultErrorHandler(err: IdGenerationError, req: Request, res: Response, next: NextFunction) {
 	if (res.headersSent) {
-		console.log('headers sent');
 		return next(err);
 	}
 	res.json({

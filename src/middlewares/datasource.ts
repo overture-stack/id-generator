@@ -58,6 +58,8 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 	return repository;
 }
 
+// builds a unique composite index containing the columns passed in the 'columns' argument.
+// a composite index is required to make sure there is always just one entity-id created for a unique set of search keys.
 function CompositeIndex(columns: string[][], name: string) {
 	return function (target: any) {
 		if (typeof target === 'function' && target.prototype) {

@@ -15,7 +15,7 @@ export function authorize(action: string){
 	return async (req: Request, res: Response, next: NextFunction) => {
 		console.log('authorize called');
 		try {
-			if(securedApi.length == 0 || securedApi.includes(action)) await getAuthStrategy()?.authHandler(req, res, next);
+			if(securedApi.includes(action)) await getAuthStrategy()?.authHandler(req, res, next);
 		} catch (err) {
 			next(err);
 		}

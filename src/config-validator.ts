@@ -68,8 +68,7 @@ export const getArray = (name: string): ZodString['_output'][] => {
 };
 
 export const getEnum = <T extends [string, ...string[]]>(name: string, zEnum: ZodEnum<T>, value: string | undefined = ''): z.infer<ZodEnum<T>> => {
-    if(!value || value?.length==0) value = process.env[name];
-    const stringValue = zEnum.safeParse(value);
+    const stringValue = zEnum.safeParse(value || process.env[name]);
     if (!stringValue.success) {
         throw new Error(`Environment variable ${name} has an invalid value. Valid values are: ${zEnum.options}`);
     }
