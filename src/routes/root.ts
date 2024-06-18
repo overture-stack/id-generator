@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { findIdFor, getId } from '../services/id-service.js';
 
 
-class ServiceRouter {
-	root(request: Request, response: Response) {
+
+export async function root(request: Request, response: Response) {
 		const healthcheck = {
 			message: 'Service Up',
 			timestamp: Date.now(),
@@ -11,7 +11,7 @@ class ServiceRouter {
 		return response.send(healthcheck);
 	}
 
-	getIdForEntity(request: Request, response: Response, next: NextFunction) {
+export async function getIdForEntity(request: Request, response: Response, next: NextFunction) {
 		const requestId = Date.now();
 		console.log(requestId);
 		return getId({...request.params}, requestId)
@@ -21,7 +21,7 @@ class ServiceRouter {
 			});
 	}
 
-	findIdForEntity(request: Request, response: Response, next: NextFunction) {
+export async function findIdForEntity(request: Request, response: Response, next: NextFunction) {
 		const requestId = Date.now();
 		console.log(requestId);
 		return findIdFor({...request.params}, requestId)
@@ -30,6 +30,4 @@ class ServiceRouter {
 				next(err);
 			});
 	}
-}
 
-export default new ServiceRouter();

@@ -4,6 +4,7 @@ import * as config from '../../config.js';
 import { ForbiddenError, UnauthorizedError } from '../error-handler.js';
 import { extractHeaderToken, isJwt } from './auth-util.js';
 import {AuthorizationStrategy} from "./auth-types.js";
+import {RecordType, z} from "zod";
 import axios from 'axios';
 
 interface Permissions {
@@ -101,14 +102,24 @@ class KeycloakAuth implements AuthorizationStrategy {
 			console.log('Invalid aud');
 			return false;
 		}
-		const tokenPermissions: Permissions[] = permissionTokenJson.authorization['permissions'];
-		const scopesChecker = config.scopes.every((sc) => {
+		//const tokenPermissions: Permissions[] = permissionTokenJson.authorization['permissions'];
+		const tokenPermissions = this.validateIntrospectionResponse(permissionTokenJson);
+
+		/*const scopesChecker = config.scopes.every((sc) => {
 			return (
 				tokenPermissions.filter((p: Permissions) => {
 					return p.rsname.includes(sc.split('.')[0]) && p.scopes?.includes(sc.split('.')[1]);
 				}).length > 0
 			);
+		});*/
+		const scopesChecker = config.scopes.every((sc) => {
+			return (
+				tokenPermissions.filter((p) => {
+					return p.rsname.includes(sc.split('.')[0]) && p.scopes?.includes(sc.split('.')[1]);
+				}).length > 0
+			);
 		});
+
 		if (!scopesChecker) {
 			console.log('invalid scopes');
 			return false;
@@ -125,6 +136,29 @@ class KeycloakAuth implements AuthorizationStrategy {
 			scope: 'openid',
 		});
 		return client;
+	}
+
+	 validateIntrospectionResponse(introspectionResponse: any){
+		// Expected structure of keycloak permissions from TokenIntrospectionResponse
+		const KeycloakPermission = z.object({
+			scopes: z.string().array().optional(),
+			rsid: z.string(),
+			rsname: z.string(),
+		});
+
+		type KeycloakPermission = z.infer<typeof KeycloakPermission>;
+
+		const KeycloakIntorspectionAuthorization = z.object({
+			permissions: z.array(KeycloakPermission)
+		})
+		type KeycloakIntorspectionAuthorization = z.infer<typeof KeycloakIntorspectionAuthorization>;
+
+		const authorizationParseResult = KeycloakIntorspectionAuthorization.safeParse(introspectionResponse.authorization);
+		if(!authorizationParseResult.success) {
+			console.warn(`Introspection auth token does not contain permissions in the expected format. Parsing error:`, authorizationParseResult.error)
+		}
+		const tokenPermissions = authorizationParseResult.success ? authorizationParseResult.data.permissions : [];
+		return tokenPermissions;
 	}
 }
 

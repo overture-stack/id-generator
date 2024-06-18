@@ -1,4 +1,4 @@
-import router from './routes/root.js';
+import * as router from './routes/root.js';
 import { defaultErrorHandler } from './middlewares/error-handler.js';
 import { initializeDB, initializeDBSequences } from './middlewares/datasource.js';
 import * as config from './config.js';
