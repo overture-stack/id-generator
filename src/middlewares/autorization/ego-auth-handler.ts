@@ -16,7 +16,7 @@ class EgoAuth implements AuthorizationStrategy {
 				return response.data;
 			}catch(e){
 				console.log(e);
-				throw new NetworkError(`EGO connection failure. Caused by: ${e}`, 500);
+				throw new NetworkError(`EGO connection failure. Caused by: ${e.message}`, 500);
 			}
 		},
 		{
