@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Issuer } from 'openid-client';
 import * as config from '../../config.js';
-import { ForbiddenError, UnauthorizedError } from '../error-handler.js';
+import {ForbiddenError, NetworkError, UnauthorizedError} from '../error-handler.js';
 import { extractHeaderToken, isJwt } from './auth-util.js';
 import {AuthorizationStrategy} from "./auth-types.js";
 import {RecordType, z} from "zod";
@@ -41,17 +41,14 @@ class KeycloakAuth implements AuthorizationStrategy {
 		const token = extractHeaderToken(req);
 		try {
 			if (!(await this.hasPermissions(token))) {
-				res.statusCode = 403;
 				throw new ForbiddenError('Forbidden. Permission Denied', 403);
 			}
 		} catch (e) {
-			if (e instanceof ForbiddenError) {
-				res.statusCode = 403;
+			if (e instanceof ForbiddenError || e instanceof NetworkError) {
 				throw e;
 			} else {
 				console.log(e);
-				res.statusCode = 401;
-				throw new UnauthorizedError('You need to be authenticated for this request.', 401);
+				throw new UnauthorizedError(`Could not authenticate: ${e}`, 401);
 			}
 		}
 	}
@@ -65,7 +62,7 @@ class KeycloakAuth implements AuthorizationStrategy {
 	}
 
 	async handleApiKey(apiKey: string) {
-		const basicAuth = Buffer.from(config.clientId + ':' + config.clientSecret, 'binary').toString('base64');
+		/*const basicAuth = Buffer.from(config.clientId + ':' + config.clientSecret, 'binary').toString('base64');
 		const headers = {
 			headers: {
 				'Content-Type': 'multipart/form-data',
@@ -74,7 +71,8 @@ class KeycloakAuth implements AuthorizationStrategy {
 		};
 		const data = new FormData();
 		data.append('apiKey', apiKey);
-		const response = await axios.post(config.authServerUrl + '/apikey/check_api_key/', data, headers);
+		const response = await axios.post(config.authServerUrl + '/apikey/check_api_key/', data, headers);*/
+		const response = await this.checkApiKey(apiKey);
 		if (response.data.revoked && !response.data.valid) {
 			console.log('token invalid or revoked');
 			return false;
@@ -93,7 +91,7 @@ class KeycloakAuth implements AuthorizationStrategy {
 
 	async handleJwt(token: string) {
 		const client = await this.getClient();
-		const permissionTokenJson: TokenIntrospectionResponse = await client.introspect(token);
+		const permissionTokenJson = await client.introspect(token);
 		if (!permissionTokenJson.active) {
 			console.log('Token inactive');
 			return false;
@@ -102,16 +100,7 @@ class KeycloakAuth implements AuthorizationStrategy {
 			console.log('Invalid aud');
 			return false;
 		}
-		//const tokenPermissions: Permissions[] = permissionTokenJson.authorization['permissions'];
 		const tokenPermissions = this.validateIntrospectionResponse(permissionTokenJson);
-
-		/*const scopesChecker = config.scopes.every((sc) => {
-			return (
-				tokenPermissions.filter((p: Permissions) => {
-					return p.rsname.includes(sc.split('.')[0]) && p.scopes?.includes(sc.split('.')[1]);
-				}).length > 0
-			);
-		});*/
 		const scopesChecker = config.scopes.every((sc) => {
 			return (
 				tokenPermissions.filter((p) => {
@@ -129,13 +118,37 @@ class KeycloakAuth implements AuthorizationStrategy {
 	}
 
 	async getClient() {
-		const issuer = await Issuer.discover(config.authServerUrl + '/.well-known/openid-configuration');
-		const client = new issuer.Client({
-			client_id: config.clientId,
-			client_secret: config.clientSecret,
-			scope: 'openid',
-		});
-		return client;
+		try {
+			const issuer = await Issuer.discover(config.authServerUrl + '/.well-known/openid-configuration');
+			const client = new issuer.Client({
+				client_id: config.clientId,
+				client_secret: config.clientSecret,
+				scope: 'openid',
+			});
+			return client;
+		}catch(e){
+			console.log(e);
+			throw new NetworkError('KEYCLOAK connection failure', 500);
+		}
+	}
+
+	async checkApiKey(apiKey: string){
+		try {
+			const basicAuth = Buffer.from(config.clientId + ':' + config.clientSecret, 'binary').toString('base64');
+			const headers = {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+					Authorization: 'Basic ' + basicAuth,
+				},
+			};
+			const data = new FormData();
+			data.append('apiKey', apiKey);
+			const response = await axios.post(config.authServerUrl + '/apikey/check_api_key/', data, headers);
+			return response;
+		}catch(e){
+			console.log(e);
+			throw new NetworkError(`KEYCLOAK connection failure. Caused by: ${e}`, 500);
+		}
 	}
 
 	 validateIntrospectionResponse(introspectionResponse: any){
