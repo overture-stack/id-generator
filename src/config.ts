@@ -8,7 +8,7 @@ import {
 	getRequiredString,
 	getSchemaDef,
 	getString,
-	getUrl,
+	getUrl, validateArrayContents,
 } from './config-validator.js';
 import { SchemaInfo } from './middlewares/datasource.js';
 import {RecordType, z} from "zod";
@@ -44,7 +44,7 @@ export const scopes = getArray('SCOPES');
 export const dbSequences = getArray('DB_SEQUENCES');
 
 export const securedApi = getArray('SECURED_API');
-securedApi.forEach(api => {getEnum('SECURED_API', z.enum(apiList), api)});
+securedApi.forEach(api => {validateArrayContents('SECURED_API', z.enum(apiList), api)});
 
 export const authStrategy: AuthStrategy = getEnum('AUTH_STRATEGY', z.enum(authList));
 
