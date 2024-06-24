@@ -40,7 +40,7 @@ export const logging: boolean = JSON.parse(process.env.DB_LOGGING || 'false');
 
 export const entityList = getRequiredArray('ENTITY_LIST');
 
-export const scopes = getArray('SCOPES');
+export const scopes = getArray('AUTH_WRITE_SCOPES');
 export const dbSequences = getArray('DB_SEQUENCES');
 
 export const securedApi = getArray('SECURED_API');
