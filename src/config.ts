@@ -27,8 +27,8 @@ export const dbPassword = getRequiredString('DB_PASSWORD');
 export const dbSchema = getRequiredString('DB_SCHEMA');
 export const dbName = getRequiredString('DB_NAME');
 export const requestRoute = getRequiredString('REQUEST_ROUTE');
-export const clientId = getRequiredString('CLIENT_ID');
-export const clientSecret = getRequiredString('CLIENT_SECRET');
+export const clientId = getRequiredString('AUTH_SERVER_CLIENT_ID');
+export const clientSecret = getRequiredString('AUTH_SERVER_CLIENT_SECRET');
 
 export const authServerUrl = getUrl('AUTH_SERVER_URL');
 
