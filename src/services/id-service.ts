@@ -82,7 +82,6 @@ function validateSearchParams(searchCriteria: RecordType<string, string>) {
 }
 
 function getSearchCriteria(entity: string, requestParams: Record<string, string>) {
-	const property = `${entity.toUpperCase()}_SEARCH`;
 	const search = config.searchCriterias.get(entity);
 	const keyCriteria = {...search};
 	for (const param in requestParams) {

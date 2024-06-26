@@ -8,25 +8,25 @@ import {
 	Unique,
 } from 'typeorm';
 import * as config from '../config.js';
+import { getSchemaDef } from '../config-validator.js';
 
 export interface SchemaInfo {
 	tablename: string;
 	columns: { name: string; type: ColumnType; defaultValue?: string; unique?: boolean }[];
-	index: string[];
+	index: string[][];
 }
 
 const schemaInfo: SchemaInfo = new (class implements SchemaInfo {
 	columns: { name: string; type: ColumnType; defaultValue?: string; unique?: boolean }[];
-	index: string[];
+	index: string[][];
 	tablename: string;
 })();
-
 
 export async function prepareDataSource(schema: SchemaInfo, requestId: number, dbSync: boolean) {
 	@Entity({
 		name: schema.tablename,
 	})
-	@Unique('composite_index_' + schema.tablename, schema.index)
+	@CompositeIndex(schema.index, schema.tablename)
 	class DynamicEntity {
 		@PrimaryGeneratedColumn()
 		id: number;
@@ -56,6 +56,18 @@ export async function prepareDataSource(schema: SchemaInfo, requestId: number, d
 	await dataSourceConn.initialize();
 	const repository = dataSourceConn.getRepository(DynamicEntity);
 	return repository;
+}
+
+// builds a unique composite index containing the columns passed in the 'columns' argument.
+// a composite index is required to make sure there is always just one entity-id created for a unique set of search keys.
+function CompositeIndex(columns: string[][], name: string) {
+	return function (target: any) {
+		if (typeof target === 'function' && target.prototype) {
+			columns.forEach((colList) => Unique('UQ_'+name+'_composite', colList)(target));
+		} else {
+			throw new Error('CompositeIndex decorator can only be applied to entity classes.');
+		}
+	};
 }
 
 export async function createSequences(sql: string) {
