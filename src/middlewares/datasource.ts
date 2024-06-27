@@ -106,7 +106,7 @@ export async function initializeDB() {
 		const schemaInfo = getTableDefinition(entity);
 		return prepareDataSource(schemaInfo, 1, true)
 			.then(() => console.log(`Entity ${entity} initialized`))
-			.catch(() => console.log(`Error upon ${entity} initialization`));
+			.catch((err) => console.log(`Error upon ${entity} initialization: `+err));
 	});
 	await Promise.all(dbInitializationPromises);
 }
