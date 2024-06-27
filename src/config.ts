@@ -14,10 +14,11 @@ import { SchemaInfo } from './middlewares/datasource.js';
 import {RecordType, z} from "zod";
 import {apiList, authList, AuthStrategy, SecuredApi} from "./middlewares/autorization/auth-types.js";
 
-if (dotenv.config().error) {
+/*if (dotenv.config().error) {
 	console.log(`Error loading environment variables, aborting.`);
 	process.exit(1);
-}
+}*/
+dotenv.config().error.message;
 
 export const publicKeyCache = getString('AUTH_PUBLICKEY_CACHE') || '1h';
 
