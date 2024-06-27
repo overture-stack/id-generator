@@ -18,7 +18,7 @@ import {apiList, authList, AuthStrategy, SecuredApi} from "./middlewares/autoriz
 	console.log(`Error loading environment variables, aborting.`);
 	process.exit(1);
 }*/
-dotenv.config().error.message;
+console.log(dotenv.config().error.message);
 
 export const publicKeyCache = getString('AUTH_PUBLICKEY_CACHE') || '1h';
 
