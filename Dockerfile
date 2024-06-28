@@ -6,7 +6,6 @@ USER node
 # copy the package json and install first to optimize docker cache for node modules
 COPY package.json /app/
 COPY package-lock.json /app/
-COPY src/resources/swagger.yaml /app/resources/
 RUN npm ci
 COPY . ./
 RUN npm run build
@@ -26,6 +25,5 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json .
 COPY --from=builder /app/package-lock.json .
-COPY --from=builder /app/resources/swagger.yaml ./dist/src/resources/swagger.yaml
 EXPOSE 3221
 CMD node dist/server.js
