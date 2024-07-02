@@ -15,7 +15,7 @@ function setupExpress() {
 	app.route('/').get(router.root);
 	app.route(config.requestRoute).get(authorize('CREATE'), router.getIdForEntity);
 	app.route(config.requestRoute + '/find').get(authorize('FIND'), router.findIdForEntity);
-	app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(yaml.load('src/resources/swagger.yaml')));
+	//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(yaml.load('src/resources/swagger.yaml')));
 	app.use(defaultErrorHandler);
 }
 
